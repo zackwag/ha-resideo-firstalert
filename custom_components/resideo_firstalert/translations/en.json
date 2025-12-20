@@ -101,13 +101,6 @@
       "reauth_successful": "Reauthentication successful"
     }
   },
-  "application_credentials": {
-    "description": "Follow the [instructions]({more_info_url}) to configure Resideo OAuth credentials.\n\nNote: OAuth requires the Resideo client ID. You can use the built-in client ID or provide your own.",
-    "data": {
-      "client_id": "Client ID",
-      "client_secret": "Client Secret (leave empty for PKCE)"
-    }
-  },
   "entity": {
     "binary_sensor": {
       "smoke": {
