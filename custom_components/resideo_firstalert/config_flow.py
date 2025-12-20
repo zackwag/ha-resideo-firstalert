@@ -7,13 +7,27 @@ from typing import Any
 
 import voluptuous as vol
 
-from homeassistant.config_entries import ConfigEntry, ConfigFlow, ConfigFlowResult
+from homeassistant.config_entries import (
+    ConfigEntry,
+    ConfigFlow,
+    ConfigFlowResult,
+    OptionsFlow,
+)
 from homeassistant.const import CONF_TOKEN
+from homeassistant.core import callback
 from homeassistant.helpers import config_entry_oauth2_flow
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import ResideoApiClient, ResideoAuthError, ResideoConnectionError
-from .const import CONF_REFRESH_TOKEN, DOMAIN, OAUTH_SCOPES
+from .const import (
+    CONF_REFRESH_TOKEN,
+    CONF_SCAN_INTERVAL,
+    DEFAULT_SCAN_INTERVAL,
+    DOMAIN,
+    MAX_SCAN_INTERVAL,
+    MIN_SCAN_INTERVAL,
+    OAUTH_SCOPES,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -24,6 +38,12 @@ class ResideoOAuth2FlowHandler(
     """Handle the OAuth2 config flow for Resideo."""
 
     DOMAIN = DOMAIN
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry: ConfigEntry) -> OptionsFlow:
+        """Get the options flow for this handler."""
+        return ResideoOptionsFlowHandler()
 
     @property
     def logger(self) -> logging.Logger:
@@ -207,3 +227,84 @@ class ResideoOAuth2FlowHandler(
 
 # Import for API error
 from .api import ResideoApiError
+
+
+class ResideoOptionsFlowHandler(OptionsFlow):
+    """Handle options flow for Resideo."""
+
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Show menu of options."""
+        return self.async_show_menu(
+            step_id="init",
+            menu_options=["settings", "update_token"],
+        )
+
+    async def async_step_settings(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Manage general settings."""
+        if user_input is not None:
+            return self.async_create_entry(title="", data=user_input)
+
+        current_interval = self.config_entry.options.get(
+            CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
+        )
+
+        return self.async_show_form(
+            step_id="settings",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(
+                        CONF_SCAN_INTERVAL,
+                        default=current_interval,
+                    ): vol.All(
+                        vol.Coerce(int),
+                        vol.Range(min=MIN_SCAN_INTERVAL, max=MAX_SCAN_INTERVAL),
+                    ),
+                }
+            ),
+        )
+
+    async def async_step_update_token(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Update the refresh token."""
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            refresh_token = user_input[CONF_REFRESH_TOKEN]
+
+            # Test the new token
+            session = async_get_clientsession(self.hass)
+            client = ResideoApiClient(session, refresh_token)
+
+            try:
+                await client.get_accounts()
+
+                # Update the config entry data with new token
+                new_data = {**self.config_entry.data, CONF_REFRESH_TOKEN: refresh_token}
+                if CONF_TOKEN in self.config_entry.data:
+                    new_data[CONF_TOKEN] = {"refresh_token": refresh_token}
+
+                self.hass.config_entries.async_update_entry(
+                    self.config_entry,
+                    data=new_data,
+                )
+
+                return self.async_create_entry(title="", data=self.config_entry.options)
+
+            except ResideoAuthError:
+                errors["base"] = "invalid_auth"
+            except ResideoConnectionError:
+                errors["base"] = "cannot_connect"
+            except Exception:
+                _LOGGER.exception("Unexpected exception")
+                errors["base"] = "unknown"
+
+        return self.async_show_form(
+            step_id="update_token",
+            data_schema=vol.Schema({vol.Required(CONF_REFRESH_TOKEN): str}),
+            errors=errors,
+        )

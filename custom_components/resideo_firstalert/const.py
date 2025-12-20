@@ -17,10 +17,13 @@ API_ACCOUNTS_ENDPOINT = "/ris-public-api/api/v1/accounts"
 API_DEVICE_STATE_ENDPOINT = "/ris-public-api/api/v2/devices/smokeDetectors/{device_id}/state"
 
 # Update interval
-DEFAULT_SCAN_INTERVAL = timedelta(seconds=60)
+DEFAULT_SCAN_INTERVAL = 60  # seconds
+MIN_SCAN_INTERVAL = 5  # seconds
+MAX_SCAN_INTERVAL = 3600  # seconds (1 hour)
 
 # Config keys
 CONF_REFRESH_TOKEN = "refresh_token"
+CONF_SCAN_INTERVAL = "scan_interval"
 CONF_ACCESS_TOKEN = "access_token"
 CONF_TOKEN_EXPIRY = "token_expiry"
 
@@ -35,6 +38,11 @@ ALARM_STATE_LOW = "low"
 ALARM_STATE_NONE = "none"
 ALARM_STATE_AC = "ac"
 ALARM_STATE_BATTERY = "battery"
+ALARM_STATE_NOT_SILENCED = "not_silenced"
+ALARM_STATE_SILENCED = "silenced"
+ALARM_STATE_EOL_NO = "no"
+ALARM_STATE_EOL_YES = "yes"
+ALARM_STATE_TESTING = "testing"
 
 # Platforms
 PLATFORMS = ["binary_sensor", "sensor"]

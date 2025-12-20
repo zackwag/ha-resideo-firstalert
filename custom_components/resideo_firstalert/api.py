@@ -30,6 +30,9 @@ class DeviceState:
     device_type: str
     sku: str
     is_online: bool
+    is_supervision_healthy: bool
+
+    # Alarm states
     smoke_state: str
     co_state: str
     battery_state: str
@@ -38,10 +41,41 @@ class DeviceState:
     test_state: str
     silence_state: str
     eol_state: str
+
+    # Device config
+    early_warning: bool | None
+    language: str | None
+    room: int | None
+
+    # Device status
     rssi: int | None
     ssid: str | None
+
+    # Firmware/hardware versions
     firmware_version: str | None
+    fw_ver_exec_core: str | None
+    fw_ver_sensor_core: str | None
+    hw_ver_e2c: str | None
+    hw_ver_exec_core: str | None
+    hw_ver_sensor_core: str | None
+    voice_file_ver: str | None
+    running_hours: int | None
+
+    # Fault flags
+    fault: bool
+    e2_fault: bool
+    photo_fault: bool
+    drift_malfunction: bool
+    co_fault: bool
+    temperature_fault: bool
+    voice_fault: bool
+    radio_fault: bool
+
+    # Timestamps
     last_message_time: str | None
+    registration_date: str | None
+    last_firmware_update_time: str | None
+
     raw_data: dict[str, Any]
 
 
@@ -227,6 +261,8 @@ class ResideoApiClient:
         alarm_state = reported.get("alarmState", {})
         device_status = reported.get("deviceStatus", {})
         device_info_data = reported.get("deviceInfo", {})
+        device_config = reported.get("deviceConfig", {})
+        status_flags = reported.get("deviceStatusFlags", {})
 
         return DeviceState(
             device_id=state_data.get("name", device_info.get("device_id", "")),
@@ -234,6 +270,8 @@ class ResideoApiClient:
             device_type=state_data.get("deviceType", ""),
             sku=state_data.get("sku", ""),
             is_online=state_data.get("isOnline", False),
+            is_supervision_healthy=state_data.get("isSupervisionHealthy", False),
+            # Alarm states
             smoke_state=alarm_state.get("smoke", {}).get("deviceState", "unknown"),
             co_state=alarm_state.get("co", {}).get("deviceState", "unknown"),
             battery_state=alarm_state.get("battery", {}).get("deviceState", "unknown"),
@@ -242,10 +280,35 @@ class ResideoApiClient:
             test_state=alarm_state.get("test", {}).get("deviceState", "unknown"),
             silence_state=alarm_state.get("silence", {}).get("deviceState", "unknown"),
             eol_state=alarm_state.get("eol", {}).get("deviceState", "unknown"),
+            # Device config
+            early_warning=device_config.get("earlyWarning"),
+            language=device_config.get("language"),
+            room=device_config.get("room"),
+            # Device status
             rssi=device_status.get("rssi"),
             ssid=device_status.get("ssid"),
+            # Firmware/hardware versions
             firmware_version=device_info_data.get("fwVerE2C"),
+            fw_ver_exec_core=device_info_data.get("fwVerExecCore"),
+            fw_ver_sensor_core=device_info_data.get("fwVerSensorCore"),
+            hw_ver_e2c=device_info_data.get("hwVerE2C"),
+            hw_ver_exec_core=device_info_data.get("hwVerExecCore"),
+            hw_ver_sensor_core=device_info_data.get("hwVerSensorCore"),
+            voice_file_ver=device_info_data.get("voiceFileVer"),
+            running_hours=device_info_data.get("runningHrs"),
+            # Fault flags
+            fault=status_flags.get("fault", False),
+            e2_fault=status_flags.get("e2Fault", False),
+            photo_fault=status_flags.get("photoFault", False),
+            drift_malfunction=status_flags.get("driftMalfunction", False),
+            co_fault=status_flags.get("coFault", False),
+            temperature_fault=status_flags.get("temperatureFault", False),
+            voice_fault=status_flags.get("voiceFault", False),
+            radio_fault=status_flags.get("radioFault", False),
+            # Timestamps
             last_message_time=state_data.get("lastMessageReceivedTime"),
+            registration_date=state_data.get("registrationDate"),
+            last_firmware_update_time=state_data.get("lastFirmwareUpdateTime"),
             raw_data=state_data,
         )
 

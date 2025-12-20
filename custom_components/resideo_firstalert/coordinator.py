@@ -22,14 +22,14 @@ class ResideoDataUpdateCoordinator(DataUpdateCoordinator[dict[str, DeviceState]]
         self,
         hass: HomeAssistant,
         client: ResideoApiClient,
-        update_interval: timedelta = DEFAULT_SCAN_INTERVAL,
+        update_interval_seconds: int = DEFAULT_SCAN_INTERVAL,
     ) -> None:
         """Initialize the coordinator."""
         super().__init__(
             hass,
             _LOGGER,
             name=DOMAIN,
-            update_interval=update_interval,
+            update_interval=timedelta(seconds=update_interval_seconds),
         )
         self.client = client
 

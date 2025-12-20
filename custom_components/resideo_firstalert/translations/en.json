@@ -1,4 +1,31 @@
 {
+  "options": {
+    "step": {
+      "init": {
+        "title": "Configure First Alert by Resideo",
+        "menu_options": {
+          "settings": "Settings",
+          "update_token": "Update refresh token"
+        }
+      },
+      "settings": {
+        "title": "Settings",
+        "data": {
+          "scan_interval": "Update interval (seconds)"
+        },
+        "data_description": {
+          "scan_interval": "How often to poll the Resideo API for updates (5-3600 seconds)"
+        }
+      },
+      "update_token": {
+        "title": "Update Refresh Token",
+        "description": "Enter a new refresh token if your current one has expired.",
+        "data": {
+          "refresh_token": "Refresh Token"
+        }
+      }
+    }
+  },
   "config": {
     "step": {
       "user": {
@@ -79,6 +106,45 @@
       },
       "battery_low": {
         "name": "Battery Low"
+      },
+      "test_mode": {
+        "name": "Test Mode"
+      },
+      "silenced": {
+        "name": "Silenced"
+      },
+      "end_of_life": {
+        "name": "End of Life"
+      },
+      "early_warning": {
+        "name": "Early Warning"
+      },
+      "supervision_healthy": {
+        "name": "Supervision Healthy"
+      },
+      "fault": {
+        "name": "General Fault"
+      },
+      "e2_fault": {
+        "name": "E2 Fault"
+      },
+      "photo_fault": {
+        "name": "Photo Sensor Fault"
+      },
+      "drift_malfunction": {
+        "name": "Drift Malfunction"
+      },
+      "co_fault": {
+        "name": "CO Sensor Fault"
+      },
+      "temperature_fault": {
+        "name": "Temperature Sensor Fault"
+      },
+      "voice_fault": {
+        "name": "Voice Module Fault"
+      },
+      "radio_fault": {
+        "name": "Radio Fault"
       }
     },
     "sensor": {
@@ -114,6 +180,36 @@
           "unknown": "Unknown"
         }
       },
+      "test_status": {
+        "name": "Test Status",
+        "state": {
+          "idle": "Idle",
+          "testing": "Testing",
+          "unknown": "Unknown"
+        }
+      },
+      "silence_status": {
+        "name": "Silence Status",
+        "state": {
+          "not_silenced": "Not Silenced",
+          "silenced": "Silenced",
+          "unknown": "Unknown"
+        }
+      },
+      "eol_status": {
+        "name": "End of Life Status",
+        "state": {
+          "no": "No",
+          "yes": "Yes",
+          "unknown": "Unknown"
+        }
+      },
+      "language": {
+        "name": "Language"
+      },
+      "room": {
+        "name": "Room"
+      },
       "wifi_signal_strength": {
         "name": "WiFi Signal Strength"
       },
@@ -125,6 +221,33 @@
       },
       "firmware_version": {
         "name": "Firmware Version"
+      },
+      "fw_ver_exec_core": {
+        "name": "Firmware (Exec Core)"
+      },
+      "fw_ver_sensor_core": {
+        "name": "Firmware (Sensor Core)"
+      },
+      "hw_ver_e2c": {
+        "name": "Hardware Version (E2C)"
+      },
+      "hw_ver_exec_core": {
+        "name": "Hardware Version (Exec Core)"
+      },
+      "hw_ver_sensor_core": {
+        "name": "Hardware Version (Sensor Core)"
+      },
+      "voice_file_version": {
+        "name": "Voice File Version"
+      },
+      "running_hours": {
+        "name": "Running Hours"
+      },
+      "registration_date": {
+        "name": "Registration Date"
+      },
+      "last_firmware_update": {
+        "name": "Last Firmware Update"
       }
     }
   }

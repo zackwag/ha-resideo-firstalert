@@ -12,7 +12,5 @@ services:
     environment:
       - TZ=America/Vancouver
     restart: unless-stopped
-    network_mode: host
-    # Alternatively, use port mapping instead of host network:
-    # ports:
-    #   - "8123:8123"
+    ports:
+      - "8123:8123"

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from datetime import timedelta
 from typing import TYPE_CHECKING
 
 from homeassistant.config_entries import ConfigEntry
@@ -12,7 +13,7 @@ from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import ResideoApiClient, ResideoAuthError, ResideoConnectionError
-from .const import CONF_REFRESH_TOKEN, DOMAIN
+from .const import CONF_REFRESH_TOKEN, CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL, DOMAIN
 from .coordinator import ResideoDataUpdateCoordinator
 
 if TYPE_CHECKING:
@@ -29,6 +30,7 @@ PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.SENSOR]
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up First Alert by Resideo from a config entry."""
     refresh_token = entry.data[CONF_REFRESH_TOKEN]
+    scan_interval = entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
 
     session = async_get_clientsession(hass)
     client = ResideoApiClient(session, refresh_token)
@@ -43,7 +45,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         raise ConfigEntryNotReady(f"Connection error: {err}") from err
 
     # Create the coordinator
-    coordinator = ResideoDataUpdateCoordinator(hass, client)
+    coordinator = ResideoDataUpdateCoordinator(hass, client, scan_interval)
 
     # Fetch initial data
     await coordinator.async_config_entry_first_refresh()
@@ -54,7 +56,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Set up platforms
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
+    # Listen for options updates
+    entry.async_on_unload(entry.add_update_listener(async_options_updated))
+
     return True
+
+
+async def async_options_updated(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Handle options update."""
+    coordinator: ResideoDataUpdateCoordinator = entry.runtime_data
+    scan_interval = entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
+    coordinator.update_interval = timedelta(seconds=scan_interval)
+    _LOGGER.debug("Updated scan interval to %s seconds", scan_interval)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

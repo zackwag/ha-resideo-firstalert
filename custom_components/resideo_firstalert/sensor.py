@@ -7,6 +7,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
+from dateutil.parser import isoparse
+
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
@@ -25,6 +27,16 @@ from .const import DOMAIN
 from .coordinator import ResideoDataUpdateCoordinator
 
 
+def parse_timestamp(value: str | None) -> datetime | None:
+    """Parse an ISO timestamp string to datetime."""
+    if value is None:
+        return None
+    try:
+        return isoparse(value)
+    except (ValueError, TypeError):
+        return None
+
+
 @dataclass(frozen=True, kw_only=True)
 class ResideoSensorEntityDescription(SensorEntityDescription):
     """Describes a Resideo sensor entity."""
@@ -33,6 +45,7 @@ class ResideoSensorEntityDescription(SensorEntityDescription):
 
 
 SENSOR_DESCRIPTIONS: tuple[ResideoSensorEntityDescription, ...] = (
+    # Status sensors (enabled by default)
     ResideoSensorEntityDescription(
         key="battery_status",
         translation_key="battery_status",
@@ -62,6 +75,41 @@ SENSOR_DESCRIPTIONS: tuple[ResideoSensorEntityDescription, ...] = (
         value_fn=lambda state: state.co_state,
     ),
     ResideoSensorEntityDescription(
+        key="test_status",
+        translation_key="test_status",
+        device_class=SensorDeviceClass.ENUM,
+        options=["idle", "testing", "unknown"],
+        value_fn=lambda state: state.test_state,
+    ),
+    ResideoSensorEntityDescription(
+        key="silence_status",
+        translation_key="silence_status",
+        device_class=SensorDeviceClass.ENUM,
+        options=["not_silenced", "silenced", "unknown"],
+        value_fn=lambda state: state.silence_state,
+    ),
+    ResideoSensorEntityDescription(
+        key="eol_status",
+        translation_key="eol_status",
+        device_class=SensorDeviceClass.ENUM,
+        options=["no", "yes", "unknown"],
+        value_fn=lambda state: state.eol_state,
+    ),
+    # Configuration sensors (enabled by default)
+    ResideoSensorEntityDescription(
+        key="language",
+        translation_key="language",
+        value_fn=lambda state: state.language,
+    ),
+    # Diagnostic sensors (disabled by default)
+    ResideoSensorEntityDescription(
+        key="room",
+        translation_key="room",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda state: state.room,
+    ),
+    ResideoSensorEntityDescription(
         key="wifi_signal_strength",
         translation_key="wifi_signal_strength",
         device_class=SensorDeviceClass.SIGNAL_STRENGTH,
@@ -83,7 +131,7 @@ SENSOR_DESCRIPTIONS: tuple[ResideoSensorEntityDescription, ...] = (
         translation_key="last_seen",
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=lambda state: state.last_message_time,
+        value_fn=lambda state: parse_timestamp(state.last_message_time),
     ),
     ResideoSensorEntityDescription(
         key="firmware_version",
@@ -91,6 +139,73 @@ SENSOR_DESCRIPTIONS: tuple[ResideoSensorEntityDescription, ...] = (
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
         value_fn=lambda state: state.firmware_version,
+    ),
+    ResideoSensorEntityDescription(
+        key="fw_ver_exec_core",
+        translation_key="fw_ver_exec_core",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda state: state.fw_ver_exec_core,
+    ),
+    ResideoSensorEntityDescription(
+        key="fw_ver_sensor_core",
+        translation_key="fw_ver_sensor_core",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda state: state.fw_ver_sensor_core,
+    ),
+    ResideoSensorEntityDescription(
+        key="hw_ver_e2c",
+        translation_key="hw_ver_e2c",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda state: state.hw_ver_e2c,
+    ),
+    ResideoSensorEntityDescription(
+        key="hw_ver_exec_core",
+        translation_key="hw_ver_exec_core",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda state: state.hw_ver_exec_core,
+    ),
+    ResideoSensorEntityDescription(
+        key="hw_ver_sensor_core",
+        translation_key="hw_ver_sensor_core",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda state: state.hw_ver_sensor_core,
+    ),
+    ResideoSensorEntityDescription(
+        key="voice_file_version",
+        translation_key="voice_file_version",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda state: state.voice_file_ver,
+    ),
+    ResideoSensorEntityDescription(
+        key="running_hours",
+        translation_key="running_hours",
+        native_unit_of_measurement="h",
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda state: state.running_hours,
+    ),
+    ResideoSensorEntityDescription(
+        key="registration_date",
+        translation_key="registration_date",
+        device_class=SensorDeviceClass.TIMESTAMP,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda state: parse_timestamp(state.registration_date),
+    ),
+    ResideoSensorEntityDescription(
+        key="last_firmware_update",
+        translation_key="last_firmware_update",
+        device_class=SensorDeviceClass.TIMESTAMP,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda state: parse_timestamp(state.last_firmware_update_time),
     ),
 )
 
