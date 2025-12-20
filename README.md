@@ -9,14 +9,18 @@ A custom Home Assistant integration for First Alert Safe & Sound smoke/CO detect
 
 ## Features
 
+- **Easy Setup** - Login with your Resideo email and password directly
 - **Smoke Alarm Detection** - Binary sensor that triggers when smoke is detected
 - **CO Alarm Detection** - Binary sensor that triggers when carbon monoxide is detected
-- **Battery Status** - Monitor battery health (good/low)
+- **Battery Monitoring** - Track battery status and get low battery alerts
 - **Power Source** - See if device is on AC or battery power
 - **Connectivity Status** - Know if your detector is online
 - **Malfunction Detection** - Get alerts if the device has issues
-- **WiFi Signal Strength** - Diagnostic sensor showing signal quality
-- **Last Seen** - Track when the device last communicated
+- **Test Mode & Silence Status** - Monitor when detectors are in test mode or silenced
+- **Early Warning** - Track early warning feature status
+- **End of Life Alerts** - Know when your detector needs replacement
+- **Comprehensive Fault Detection** - Monitor various fault conditions
+- **Configurable Polling** - Adjust update interval from 5 seconds to 1 hour
 
 ## Installation
 
@@ -35,9 +39,21 @@ A custom Home Assistant integration for First Alert Safe & Sound smoke/CO detect
 
 ## Configuration
 
-### Getting Your Refresh Token
+### Authentication
 
-This integration requires a refresh token from the Resideo API. To obtain one:
+When adding the integration, you have two options:
+
+#### Option 1: Login with Email & Password (Recommended)
+
+1. Go to **Settings** → **Devices & Services** → **Add Integration**
+2. Search for "First Alert by Resideo"
+3. Select **"Login with email and password"**
+4. Enter your Resideo account credentials (same as the First Alert app)
+5. Your devices will be automatically discovered
+
+#### Option 2: Manual Token Entry
+
+If you prefer, you can manually obtain and enter a refresh token:
 
 1. **Install a network proxy** like [Proxyman](https://proxyman.io/) (macOS/iOS) or [mitmproxy](https://mitmproxy.org/)
 
@@ -57,37 +73,68 @@ This integration requires a refresh token from the Resideo API. To obtain one:
    }
    ```
 
-### Adding the Integration
+6. In Home Assistant, select **"Enter refresh token manually"** and paste your token
 
-1. Go to **Settings** → **Devices & Services** → **Add Integration**
-2. Search for "First Alert by Resideo"
-3. Enter your refresh token
-4. Your devices will be automatically discovered
+### Options
+
+After setup, you can configure the integration via **Settings** → **Devices & Services** → **First Alert by Resideo** → **Configure**:
+
+- **Settings** - Adjust the polling interval (5-3600 seconds, default: 60)
+- **Update refresh token** - Enter a new token if needed without recreating the integration
 
 ## Entities Created
 
 For each smoke detector, the following entities are created:
 
 ### Binary Sensors
-| Entity | Description | Device Class |
-|--------|-------------|--------------|
-| Smoke Alarm | On when smoke is detected | `smoke` |
-| CO Alarm | On when CO is detected | `co` |
-| Malfunction | On when device has a problem | `problem` |
-| Connectivity | On when device is online | `connectivity` |
-| Battery Low | On when battery is low | `battery` |
+
+| Entity | Description | Device Class | Default |
+|--------|-------------|--------------|---------|
+| Smoke Alarm | On when smoke is detected | `smoke` | Enabled |
+| CO Alarm | On when CO is detected | `co` | Enabled |
+| Malfunction | On when device has a problem | `problem` | Enabled |
+| Connectivity | On when device is online | `connectivity` | Enabled |
+| Battery Low | On when battery is low | `battery` | Enabled |
+| Test Mode | On when device is in test mode | `running` | Enabled |
+| Silenced | On when alarm is silenced | `running` | Enabled |
+| End of Life | On when device needs replacement | `problem` | Enabled |
+| Early Warning | On when early warning is enabled | - | Enabled |
+| Supervision Healthy | On when supervision is healthy | - | Disabled |
+| General Fault | On when general fault detected | `problem` | Disabled |
+| E2 Fault | On when E2 fault detected | `problem` | Disabled |
+| Photo Sensor Fault | On when photo sensor fault detected | `problem` | Disabled |
+| Drift Malfunction | On when drift malfunction detected | `problem` | Disabled |
+| CO Sensor Fault | On when CO sensor fault detected | `problem` | Disabled |
+| Temperature Sensor Fault | On when temp sensor fault detected | `problem` | Disabled |
+| Voice Module Fault | On when voice module fault detected | `problem` | Disabled |
+| Radio Fault | On when radio fault detected | `problem` | Disabled |
 
 ### Sensors
-| Entity | Description |
-|--------|-------------|
-| Battery Status | `good` or `low` |
-| Power Source | `ac` or `battery` |
-| Smoke Status | `idle` or `alarm` |
-| CO Status | `idle` or `alarm` |
-| WiFi Signal Strength | Signal strength in dBm (diagnostic) |
-| WiFi Network | Connected SSID (diagnostic) |
-| Last Seen | Timestamp of last communication |
-| Firmware Version | Device firmware (diagnostic) |
+
+| Entity | Description | Default |
+|--------|-------------|---------|
+| Battery Status | `good` or `low` | Enabled |
+| Power Source | `ac` or `battery` | Enabled |
+| Smoke Status | `idle` or `alarm` | Enabled |
+| CO Status | `idle` or `alarm` | Enabled |
+| Test Status | `idle` or `testing` | Enabled |
+| Silence Status | `not_silenced` or `silenced` | Enabled |
+| End of Life Status | `no` or `yes` | Enabled |
+| Language | Device language setting | Enabled |
+| Room | Room number setting | Disabled |
+| WiFi Signal Strength | Signal strength in dBm | Disabled |
+| WiFi Network | Connected SSID | Disabled |
+| Last Seen | Timestamp of last communication | Disabled |
+| Firmware Version | Device firmware | Disabled |
+| Firmware (Exec Core) | Exec core firmware version | Disabled |
+| Firmware (Sensor Core) | Sensor core firmware version | Disabled |
+| Hardware Version (E2C) | E2C hardware version | Disabled |
+| Hardware Version (Exec Core) | Exec core hardware version | Disabled |
+| Hardware Version (Sensor Core) | Sensor core hardware version | Disabled |
+| Voice File Version | Voice file version | Disabled |
+| Running Hours | Total running hours | Disabled |
+| Registration Date | When device was registered | Disabled |
+| Last Firmware Update | Last firmware update timestamp | Disabled |
 
 ## Example Automations
 
@@ -142,10 +189,28 @@ automation:
           message: "Living Room smoke detector battery is low"
 ```
 
+### End of Life Alert
+```yaml
+automation:
+  - alias: "Smoke Detector End of Life"
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.living_room_detector_end_of_life
+        to: "on"
+    action:
+      - service: notify.mobile_app
+        data:
+          title: "Detector Replacement Needed"
+          message: "Living Room smoke detector has reached end of life and should be replaced"
+```
+
 ## Troubleshooting
 
-### "Invalid authentication" error
-Your refresh token may have expired. Capture a new one from the app.
+### "Invalid email or password" error
+Double-check your credentials. These are the same as your First Alert / Resideo app login.
+
+### "Authentication failed" error
+Your refresh token may have expired. Use the **Configure** option to update your token, or re-authenticate with email/password.
 
 ### "Unable to connect" error
 Check your internet connection and verify the Resideo API is accessible.
@@ -153,15 +218,19 @@ Check your internet connection and verify the Resideo API is accessible.
 ### Devices not showing
 Make sure your devices are properly set up in the First Alert app and are online.
 
+### Token Expiration
+- **Access tokens** expire hourly and are automatically refreshed
+- **Refresh tokens** expire after ~30 days. When this happens, Home Assistant will prompt you to re-authenticate
+
 ## Technical Details
 
-- **Polling Interval**: 60 seconds (configurable)
+- **Polling Interval**: 60 seconds (configurable from 5-3600 seconds)
 - **API Base URL**: `https://api.resideo.com`
-- **Authentication**: OAuth 2.0 with refresh tokens
+- **Authentication**: OAuth 2.0 with PKCE via Auth0
 
 ## Privacy Note
 
-This integration communicates with Resideo's cloud servers. Your device data passes through their infrastructure. The integration stores only the refresh token locally.
+This integration communicates with Resideo's cloud servers. Your device data passes through their infrastructure. The integration stores only the refresh token locally - your email and password are not stored.
 
 ## License
 
@@ -172,7 +241,7 @@ MIT License - See LICENSE file for details.
 ### Prerequisites
 
 - Docker and Docker Compose
-- Your refresh token from the First Alert app
+- A Resideo account with First Alert devices
 
 ### Quick Start
 
@@ -197,7 +266,7 @@ MIT License - See LICENSE file for details.
 5. Complete the Home Assistant onboarding, then add the integration:
    - Settings → Devices & Services → Add Integration
    - Search "First Alert by Resideo"
-   - Enter your refresh token
+   - Login with your email and password
 
 ### Development Workflow
 
