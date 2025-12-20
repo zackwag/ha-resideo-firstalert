@@ -28,6 +28,8 @@ from .const import (
 )
 from .coordinator import ResideoDataUpdateCoordinator
 
+PARALLEL_UPDATES = 0  # Coordinator handles all updates
+
 
 @dataclass(frozen=True, kw_only=True)
 class ResideoBinarySensorEntityDescription(BinarySensorEntityDescription):

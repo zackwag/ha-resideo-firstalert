@@ -33,13 +33,21 @@ class ResideoDataUpdateCoordinator(DataUpdateCoordinator[dict[str, DeviceState]]
             update_interval=timedelta(seconds=update_interval_seconds),
         )
         self.client = client
+        self._last_update_success: bool | None = None
 
     async def _async_update_data(self) -> dict[str, DeviceState]:
         """Fetch data from the API."""
         try:
-            return await self.client.get_all_device_states()
+            data = await self.client.get_all_device_states()
+            if self._last_update_success is False:
+                _LOGGER.info("Connection to Resideo API restored")
+            self._last_update_success = True
+            return data
         except ResideoAuthError as err:
-            # Raise ConfigEntryAuthFailed to trigger reauth flow
+            self._last_update_success = False
             raise ConfigEntryAuthFailed("Authentication failed - token may have expired") from err
         except ResideoApiError as err:
+            if self._last_update_success is not False:
+                _LOGGER.warning("Unable to connect to Resideo API: %s", err)
+            self._last_update_success = False
             raise UpdateFailed(f"Error communicating with Resideo API: {err}") from err

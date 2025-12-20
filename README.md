@@ -222,6 +222,17 @@ Make sure your devices are properly set up in the First Alert app and are online
 - **Access tokens** expire hourly and are automatically refreshed
 - **Refresh tokens** expire after ~30 days. When this happens, Home Assistant will prompt you to re-authenticate
 
+## Removing the Integration
+
+To remove the First Alert by Resideo integration:
+
+1. Go to **Settings** → **Devices & Services**
+2. Find "First Alert by Resideo" and click on it
+3. Click the three-dot menu → **Delete**
+4. Confirm the deletion
+
+All entities and device data will be removed. No additional cleanup is required.
+
 ## Technical Details
 
 - **Polling Interval**: 60 seconds (configurable from 5-3600 seconds)

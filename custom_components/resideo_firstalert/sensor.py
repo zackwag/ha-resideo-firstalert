@@ -26,6 +26,8 @@ from .api import DeviceState
 from .const import DOMAIN
 from .coordinator import ResideoDataUpdateCoordinator
 
+PARALLEL_UPDATES = 0  # Coordinator handles all updates
+
 
 def parse_timestamp(value: str | None) -> datetime | None:
     """Parse an ISO timestamp string to datetime."""
