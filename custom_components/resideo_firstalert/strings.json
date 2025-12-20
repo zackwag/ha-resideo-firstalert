@@ -1,0 +1,96 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to First Alert by Resideo",
+        "description": "Enter your refresh token to connect your First Alert smoke detectors.\n\nSee the [documentation]({docs_url}) for instructions on how to obtain your refresh token.",
+        "data": {
+          "refresh_token": "Refresh Token"
+        },
+        "data_description": {
+          "refresh_token": "The refresh token obtained from the Resideo API"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Reauthenticate",
+        "description": "Your authentication has expired. Please enter a new refresh token.",
+        "data": {
+          "refresh_token": "Refresh Token"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid authentication - please check your refresh token",
+      "cannot_connect": "Unable to connect to Resideo API",
+      "unknown": "An unknown error occurred"
+    },
+    "abort": {
+      "already_configured": "This account is already configured"
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "smoke": {
+        "name": "Smoke Alarm"
+      },
+      "co": {
+        "name": "CO Alarm"
+      },
+      "malfunction": {
+        "name": "Malfunction"
+      },
+      "connectivity": {
+        "name": "Connectivity"
+      },
+      "battery_low": {
+        "name": "Battery Low"
+      }
+    },
+    "sensor": {
+      "battery_status": {
+        "name": "Battery Status",
+        "state": {
+          "good": "Good",
+          "low": "Low",
+          "unknown": "Unknown"
+        }
+      },
+      "power_source": {
+        "name": "Power Source",
+        "state": {
+          "ac": "AC Power",
+          "battery": "Battery",
+          "unknown": "Unknown"
+        }
+      },
+      "smoke_status": {
+        "name": "Smoke Status",
+        "state": {
+          "idle": "Clear",
+          "alarm": "Alarm",
+          "unknown": "Unknown"
+        }
+      },
+      "co_status": {
+        "name": "CO Status",
+        "state": {
+          "idle": "Clear",
+          "alarm": "Alarm",
+          "unknown": "Unknown"
+        }
+      },
+      "wifi_signal_strength": {
+        "name": "WiFi Signal Strength"
+      },
+      "wifi_ssid": {
+        "name": "WiFi Network"
+      },
+      "last_seen": {
+        "name": "Last Seen"
+      },
+      "firmware_version": {
+        "name": "Firmware Version"
+      }
+    }
+  }
+}
