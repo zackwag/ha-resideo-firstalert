@@ -1,0 +1,18 @@
+# Home Assistant Development Configuration
+
+# Minimal default config
+default_config:
+
+# Enable logging for debugging
+logger:
+  default: info
+  logs:
+    custom_components.resideo_firstalert: debug
+    homeassistant.components.application_credentials: debug
+
+# Allow local network access without auth for development
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 127.0.0.1
+    - ::1

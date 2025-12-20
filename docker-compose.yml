@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  homeassistant:
+    container_name: homeassistant-dev
+    image: ghcr.io/home-assistant/home-assistant:stable
+    volumes:
+      # Mount local config directory
+      - ./config:/config
+      # Mount the custom component for live development
+      - ./custom_components:/config/custom_components
+    environment:
+      - TZ=America/Vancouver
+    restart: unless-stopped
+    network_mode: host
+    # Alternatively, use port mapping instead of host network:
+    # ports:
+    #   - "8123:8123"

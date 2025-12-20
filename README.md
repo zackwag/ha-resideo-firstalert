@@ -167,6 +167,60 @@ This integration communicates with Resideo's cloud servers. Your device data pas
 
 MIT License - See LICENSE file for details.
 
+## Local Development
+
+### Prerequisites
+
+- Docker and Docker Compose
+- Your refresh token from the First Alert app
+
+### Quick Start
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/aidenmitchell/ha-resideo-firstalert.git
+   cd ha-resideo-firstalert
+   ```
+
+2. Create the config file:
+   ```bash
+   cp config/configuration.yaml.example config/configuration.yaml
+   ```
+
+3. Start Home Assistant:
+   ```bash
+   docker compose up -d
+   ```
+
+4. Open http://localhost:8123 in your browser
+
+5. Complete the Home Assistant onboarding, then add the integration:
+   - Settings → Devices & Services → Add Integration
+   - Search "First Alert by Resideo"
+   - Enter your refresh token
+
+### Development Workflow
+
+The `custom_components` folder is mounted directly into the container, so changes to the integration code take effect after restarting Home Assistant:
+
+```bash
+# Restart to pick up code changes
+docker compose restart
+
+# View logs
+docker compose logs -f homeassistant
+
+# Stop
+docker compose down
+```
+
+### Debug Logging
+
+The example configuration enables debug logging for the integration. View logs with:
+```bash
+docker compose logs -f homeassistant 2>&1 | grep resideo_firstalert
+```
+
 ## Contributing
 
 Contributions welcome! Please open an issue or PR on GitHub.

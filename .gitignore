@@ -24,5 +24,6 @@ Thumbs.db
 # HAR files (contain sensitive tokens)
 *.har
 
-# Local testing
-config/
+# Local testing - ignore everything in config except the sample
+config/*
+!config/configuration.yaml.example
