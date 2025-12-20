@@ -7,9 +7,10 @@ from datetime import timedelta
 from typing import Any
 
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .api import DeviceState, ResideoApiClient, ResideoApiError
+from .api import DeviceState, ResideoApiClient, ResideoApiError, ResideoAuthError
 from .const import DEFAULT_SCAN_INTERVAL, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
@@ -37,5 +38,8 @@ class ResideoDataUpdateCoordinator(DataUpdateCoordinator[dict[str, DeviceState]]
         """Fetch data from the API."""
         try:
             return await self.client.get_all_device_states()
+        except ResideoAuthError as err:
+            # Raise ConfigEntryAuthFailed to trigger reauth flow
+            raise ConfigEntryAuthFailed("Authentication failed - token may have expired") from err
         except ResideoApiError as err:
             raise UpdateFailed(f"Error communicating with Resideo API: {err}") from err

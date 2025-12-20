@@ -19,6 +19,7 @@ from homeassistant.helpers import config_entry_oauth2_flow
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import ResideoApiClient, ResideoAuthError, ResideoConnectionError
+from .auth import AuthenticationError, ResideoAuth
 from .const import (
     CONF_REFRESH_TOKEN,
     CONF_SCAN_INTERVAL,
@@ -60,13 +61,82 @@ class ResideoOAuth2FlowHandler(
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        """Handle user-initiated flow - offer choice between OAuth and manual."""
+        """Handle user-initiated flow - offer choice of auth methods."""
         return self.async_show_menu(
             step_id="user",
-            menu_options=["oauth", "manual"],
+            menu_options=["login", "manual"],
             description_placeholders={
                 "docs_url": "https://github.com/aidenmitchell/ha-resideo-firstalert#authentication"
             },
+        )
+
+    async def async_step_login(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Handle login with email and password."""
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            email = user_input["email"]
+            password = user_input["password"]
+
+            session = async_get_clientsession(self.hass)
+            auth = ResideoAuth(session)
+
+            try:
+                # Authenticate and get tokens
+                tokens = await auth.authenticate(email, password)
+                refresh_token = tokens.get("refresh_token")
+
+                if not refresh_token:
+                    errors["base"] = "no_refresh_token"
+                else:
+                    # Verify the token works by getting account info
+                    client = ResideoApiClient(session, refresh_token)
+                    accounts = await client.get_accounts()
+                    data = accounts.get("data", {})
+                    user_id = data.get("id", "unknown")
+                    first_name = data.get("firstName", "")
+                    last_name = data.get("lastName", "")
+
+                    await self.async_set_unique_id(user_id)
+                    self._abort_if_unique_id_configured()
+
+                    title = f"First Alert ({email})"
+                    if first_name:
+                        title = f"First Alert ({first_name} {last_name})"
+
+                    return self.async_create_entry(
+                        title=title,
+                        data={
+                            CONF_REFRESH_TOKEN: refresh_token,
+                            CONF_TOKEN: {
+                                "refresh_token": refresh_token,
+                            },
+                        },
+                    )
+
+            except AuthenticationError as err:
+                _LOGGER.error("Authentication failed: %s", err)
+                if "Invalid email or password" in str(err):
+                    errors["base"] = "invalid_auth"
+                else:
+                    errors["base"] = "auth_error"
+            except ResideoAuthError:
+                errors["base"] = "invalid_auth"
+            except ResideoConnectionError:
+                errors["base"] = "cannot_connect"
+            except Exception:
+                _LOGGER.exception("Unexpected exception during login")
+                errors["base"] = "unknown"
+
+        return self.async_show_form(
+            step_id="login",
+            data_schema=vol.Schema({
+                vol.Required("email"): str,
+                vol.Required("password"): str,
+            }),
+            errors=errors,
         )
 
     async def async_step_oauth(
@@ -178,7 +248,56 @@ class ResideoOAuth2FlowHandler(
         """Handle reauth confirmation - offer choice."""
         return self.async_show_menu(
             step_id="reauth_confirm",
-            menu_options=["reauth_oauth", "reauth_manual"],
+            menu_options=["reauth_login", "reauth_manual"],
+        )
+
+    async def async_step_reauth_login(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Handle reauth via email/password."""
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            email = user_input["email"]
+            password = user_input["password"]
+
+            session = async_get_clientsession(self.hass)
+            auth = ResideoAuth(session)
+
+            try:
+                tokens = await auth.authenticate(email, password)
+                refresh_token = tokens.get("refresh_token")
+
+                if not refresh_token:
+                    errors["base"] = "no_refresh_token"
+                else:
+                    return self.async_update_reload_and_abort(
+                        self._get_reauth_entry(),
+                        data_updates={
+                            CONF_REFRESH_TOKEN: refresh_token,
+                            CONF_TOKEN: {"refresh_token": refresh_token},
+                        },
+                    )
+
+            except AuthenticationError as err:
+                _LOGGER.error("Reauth failed: %s", err)
+                if "Invalid email or password" in str(err):
+                    errors["base"] = "invalid_auth"
+                else:
+                    errors["base"] = "auth_error"
+            except ResideoConnectionError:
+                errors["base"] = "cannot_connect"
+            except Exception:
+                _LOGGER.exception("Unexpected exception during reauth")
+                errors["base"] = "unknown"
+
+        return self.async_show_form(
+            step_id="reauth_login",
+            data_schema=vol.Schema({
+                vol.Required("email"): str,
+                vol.Required("password"): str,
+            }),
+            errors=errors,
         )
 
     async def async_step_reauth_oauth(
