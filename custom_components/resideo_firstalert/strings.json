@@ -3,6 +3,20 @@
     "step": {
       "user": {
         "title": "Connect to First Alert by Resideo",
+        "description": "Choose how you want to authenticate with your Resideo account.\n\nSee the [documentation]({docs_url}) for more information.",
+        "menu_options": {
+          "oauth": "Login with Resideo (OAuth)",
+          "manual": "Enter refresh token manually"
+        }
+      },
+      "pick_implementation": {
+        "title": "Pick Authentication Method"
+      },
+      "oauth": {
+        "title": "Login with Resideo"
+      },
+      "manual": {
+        "title": "Manual Token Entry",
         "description": "Enter your refresh token to connect your First Alert smoke detectors.\n\nSee the [documentation]({docs_url}) for instructions on how to obtain your refresh token.",
         "data": {
           "refresh_token": "Refresh Token"
@@ -13,7 +27,18 @@
       },
       "reauth_confirm": {
         "title": "Reauthenticate",
-        "description": "Your authentication has expired. Please enter a new refresh token.",
+        "description": "Your authentication has expired. Please choose how to reauthenticate.",
+        "menu_options": {
+          "reauth_oauth": "Login with Resideo (OAuth)",
+          "reauth_manual": "Enter refresh token manually"
+        }
+      },
+      "reauth_oauth": {
+        "title": "Reauthenticate with Resideo"
+      },
+      "reauth_manual": {
+        "title": "Reauthenticate with Token",
+        "description": "Enter a new refresh token to restore your connection.",
         "data": {
           "refresh_token": "Refresh Token"
         }
@@ -25,7 +50,17 @@
       "unknown": "An unknown error occurred"
     },
     "abort": {
-      "already_configured": "This account is already configured"
+      "already_configured": "This account is already configured",
+      "no_refresh_token": "No refresh token received from OAuth",
+      "oauth_error": "Error verifying OAuth token",
+      "reauth_successful": "Reauthentication successful"
+    }
+  },
+  "application_credentials": {
+    "description": "Follow the [instructions]({more_info_url}) to configure Resideo OAuth credentials.\n\nNote: OAuth requires the Resideo client ID. You can use the built-in client ID or provide your own.",
+    "data": {
+      "client_id": "Client ID",
+      "client_secret": "Client Secret (leave empty for PKCE)"
     }
   },
   "entity": {
