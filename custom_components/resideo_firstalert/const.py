@@ -24,8 +24,10 @@ CONF_REFRESH_TOKEN = "refresh_token"
 CONF_SCAN_INTERVAL = "scan_interval"
 
 # Alarm states
-ALARM_STATE_IDLE = "idle"
+ALARM_STATE_ALARM = "alarm"
 ALARM_STATE_LOW = "low"
 ALARM_STATE_NONE = "none"
-ALARM_STATE_NOT_SILENCED = "not_silenced"
-ALARM_STATE_EOL_NO = "no"
+ALARM_STATE_UNKNOWN = "unknown"
+ALARM_STATE_SILENCED = "silenced"
+ALARM_STATE_EOL_YES = "yes"
+ALARM_STATE_TESTING = "testing"

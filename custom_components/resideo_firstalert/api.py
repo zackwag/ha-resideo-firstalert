@@ -255,6 +255,8 @@ class ResideoApiClient:
             try:
                 state_data = await self.get_device_state(device_id)
                 states[device_id] = self._parse_device_state(state_data, device)
+            except ResideoAuthError:
+                raise
             except ResideoApiError as err:
                 _LOGGER.warning(
                     "Failed to get state for device %s: %s", device_id, err

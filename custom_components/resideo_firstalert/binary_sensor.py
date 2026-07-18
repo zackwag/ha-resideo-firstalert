@@ -17,11 +17,13 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .api import DeviceState
 from .const import (
-    ALARM_STATE_EOL_NO,
-    ALARM_STATE_IDLE,
+    ALARM_STATE_ALARM,
+    ALARM_STATE_EOL_YES,
     ALARM_STATE_LOW,
     ALARM_STATE_NONE,
-    ALARM_STATE_NOT_SILENCED,
+    ALARM_STATE_SILENCED,
+    ALARM_STATE_TESTING,
+    ALARM_STATE_UNKNOWN,
 )
 from .coordinator import ResideoDataUpdateCoordinator
 from .entity import ResideoEntity
@@ -42,19 +44,20 @@ BINARY_SENSOR_DESCRIPTIONS: tuple[ResideoBinarySensorEntityDescription, ...] = (
         key="smoke",
         translation_key="smoke",
         device_class=BinarySensorDeviceClass.SMOKE,
-        value_fn=lambda state: state.smoke_state != ALARM_STATE_IDLE,
+        value_fn=lambda state: state.smoke_state == ALARM_STATE_ALARM,
     ),
     ResideoBinarySensorEntityDescription(
         key="co",
         translation_key="co",
         device_class=BinarySensorDeviceClass.CO,
-        value_fn=lambda state: state.co_state != ALARM_STATE_IDLE,
+        value_fn=lambda state: state.co_state == ALARM_STATE_ALARM,
     ),
     ResideoBinarySensorEntityDescription(
         key="malfunction",
         translation_key="malfunction",
         device_class=BinarySensorDeviceClass.PROBLEM,
-        value_fn=lambda state: state.malfunction_state != ALARM_STATE_NONE,
+        value_fn=lambda state: state.malfunction_state
+        not in (ALARM_STATE_NONE, ALARM_STATE_UNKNOWN),
     ),
     ResideoBinarySensorEntityDescription(
         key="connectivity",
@@ -73,18 +76,18 @@ BINARY_SENSOR_DESCRIPTIONS: tuple[ResideoBinarySensorEntityDescription, ...] = (
         key="test_mode",
         translation_key="test_mode",
         device_class=BinarySensorDeviceClass.RUNNING,
-        value_fn=lambda state: state.test_state != ALARM_STATE_IDLE,
+        value_fn=lambda state: state.test_state == ALARM_STATE_TESTING,
     ),
     ResideoBinarySensorEntityDescription(
         key="silenced",
         translation_key="silenced",
-        value_fn=lambda state: state.silence_state != ALARM_STATE_NOT_SILENCED,
+        value_fn=lambda state: state.silence_state == ALARM_STATE_SILENCED,
     ),
     ResideoBinarySensorEntityDescription(
         key="end_of_life",
         translation_key="end_of_life",
         device_class=BinarySensorDeviceClass.PROBLEM,
-        value_fn=lambda state: state.eol_state != ALARM_STATE_EOL_NO,
+        value_fn=lambda state: state.eol_state == ALARM_STATE_EOL_YES,
     ),
     ResideoBinarySensorEntityDescription(
         key="early_warning",
