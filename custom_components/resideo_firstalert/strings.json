@@ -87,13 +87,17 @@
     },
     "abort": {
       "already_configured": "This account is already configured",
-      "reauth_successful": "Reauthentication successful"
+      "reauth_successful": "Reauthentication successful",
+      "reauth_account_mismatch": "The credentials you entered belong to a different Resideo account than the one being reauthenticated. Please use the account originally configured for this integration entry."
     }
   },
   "entity": {
     "binary_sensor": {
       "smoke": {
         "name": "Smoke Alarm"
+      },
+      "connectivity_computed": {
+        "name": "Connectivity (Computed)"
       },
       "co": {
         "name": "CO Alarm"
@@ -207,6 +211,12 @@
       },
       "language": {
         "name": "Language"
+      },
+      "registration_status": {
+        "name": "Registration Status"
+      },
+      "data_sync_state": {
+        "name": "Sync Status"
       },
       "room": {
         "name": "Room"

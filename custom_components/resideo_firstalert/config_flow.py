@@ -185,6 +185,16 @@ class ResideoConfigFlow(ConfigFlow, domain=DOMAIN):
         """Handle reauth."""
         return await self.async_step_reauth_confirm()
 
+    def _abort_if_reauth_account_mismatch(
+        self, account_data: dict[str, Any]
+    ) -> ConfigFlowResult | None:
+        """Abort if reauth was completed with a different Resideo account."""
+        user_id = account_data.get("id")
+        reauth_entry = self._get_reauth_entry()
+        if user_id and reauth_entry.unique_id and user_id != reauth_entry.unique_id:
+            return self.async_abort(reason="reauth_account_mismatch")
+        return None
+
     async def async_step_reauth_confirm(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
@@ -216,7 +226,12 @@ class ResideoConfigFlow(ConfigFlow, domain=DOMAIN):
                 else:
                     # Verify the token actually works before committing it
                     client = ResideoApiClient(session, refresh_token)
-                    await client.get_accounts()
+                    accounts = await client.get_accounts()
+
+                    if mismatch := self._abort_if_reauth_account_mismatch(
+                        accounts.get("data", {})
+                    ):
+                        return mismatch
 
                     return self.async_update_reload_and_abort(
                         self._get_reauth_entry(),
@@ -262,7 +277,12 @@ class ResideoConfigFlow(ConfigFlow, domain=DOMAIN):
             client = ResideoApiClient(session, refresh_token)
 
             try:
-                await client.get_accounts()
+                accounts = await client.get_accounts()
+
+                if mismatch := self._abort_if_reauth_account_mismatch(
+                    accounts.get("data", {})
+                ):
+                    return mismatch
 
                 return self.async_update_reload_and_abort(
                     self._get_reauth_entry(),
