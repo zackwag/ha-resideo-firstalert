@@ -28,7 +28,7 @@ A custom Home Assistant integration for First Alert Safe & Sound smoke/CO detect
 
 1. Open HACS in Home Assistant
 2. Click the three dots menu → Custom repositories
-3. Add `https://github.com/aidenmitchell/ha-resideo-firstalert` with category "Integration"
+3. Add `https://github.com/zackwag/ha-resideo-firstalert` with category "Integration"
 4. Search for "First Alert by Resideo" and install
 5. Restart Home Assistant
 
@@ -96,7 +96,7 @@ For each smoke detector, the following entities are created:
 | Connectivity | On when device is online | `connectivity` | Enabled |
 | Battery Low | On when battery is low | `battery` | Enabled |
 | Test Mode | On when device is in test mode | `running` | Enabled |
-| Silenced | On when alarm is silenced | `running` | Enabled |
+| Silenced | On when alarm is silenced | - | Enabled |
 | End of Life | On when device needs replacement | `problem` | Enabled |
 | Early Warning | On when early warning is enabled | - | Enabled |
 | Supervision Healthy | On when supervision is healthy | - | Disabled |
@@ -124,7 +124,7 @@ For each smoke detector, the following entities are created:
 | Room | Room number setting | Disabled |
 | WiFi Signal Strength | Signal strength in dBm | Disabled |
 | WiFi Network | Connected SSID | Disabled |
-| Last Seen | Timestamp of last communication | Disabled |
+| Last Seen | Timestamp of last communication | Enabled |
 | Firmware Version | Device firmware | Disabled |
 | Firmware (Exec Core) | Exec core firmware version | Disabled |
 | Firmware (Sensor Core) | Sensor core firmware version | Disabled |
@@ -258,7 +258,7 @@ MIT License - See LICENSE file for details.
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/aidenmitchell/ha-resideo-firstalert.git
+   git clone https://github.com/zackwag/ha-resideo-firstalert.git
    cd ha-resideo-firstalert
    ```
 

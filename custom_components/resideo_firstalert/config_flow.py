@@ -6,10 +6,8 @@ import logging
 from typing import Any
 
 import voluptuous as vol
-
 from homeassistant.config_entries import (
     ConfigEntry,
-    ConfigFlow,
     ConfigFlowResult,
     OptionsFlow,
 )
@@ -18,7 +16,12 @@ from homeassistant.core import callback
 from homeassistant.helpers import config_entry_oauth2_flow
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .api import ResideoApiClient, ResideoAuthError, ResideoConnectionError
+from .api import (
+    ResideoApiClient,
+    ResideoApiError,
+    ResideoAuthError,
+    ResideoConnectionError,
+)
 from .auth import AuthenticationError, ResideoAuth
 from .const import (
     CONF_REFRESH_TOKEN,
@@ -66,7 +69,7 @@ class ResideoOAuth2FlowHandler(
             step_id="user",
             menu_options=["login", "manual"],
             description_placeholders={
-                "docs_url": "https://github.com/aidenmitchell/ha-resideo-firstalert#authentication"
+                "docs_url": "https://github.com/zackwag/ha-resideo-firstalert#authentication"
             },
         )
 
@@ -196,7 +199,7 @@ class ResideoOAuth2FlowHandler(
             data_schema=vol.Schema({vol.Required(CONF_REFRESH_TOKEN): str}),
             errors=errors,
             description_placeholders={
-                "docs_url": "https://github.com/aidenmitchell/ha-resideo-firstalert#getting-your-refresh-token"
+                "docs_url": "https://github.com/zackwag/ha-resideo-firstalert#getting-your-refresh-token"
             },
         )
 
@@ -342,10 +345,6 @@ class ResideoOAuth2FlowHandler(
             data_schema=vol.Schema({vol.Required(CONF_REFRESH_TOKEN): str}),
             errors=errors,
         )
-
-
-# Import for API error
-from .api import ResideoApiError
 
 
 class ResideoOptionsFlowHandler(OptionsFlow):

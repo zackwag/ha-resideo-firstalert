@@ -8,7 +8,6 @@ from datetime import datetime
 from typing import Any
 
 from dateutil.parser import isoparse
-
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
@@ -16,15 +15,13 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import EntityCategory, SIGNAL_STRENGTH_DECIBELS_MILLIWATT
+from homeassistant.const import SIGNAL_STRENGTH_DECIBELS_MILLIWATT, EntityCategory
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .api import DeviceState
-from .const import DOMAIN
 from .coordinator import ResideoDataUpdateCoordinator
+from .entity import ResideoEntity
 
 PARALLEL_UPDATES = 0  # Coordinator handles all updates
 
@@ -234,11 +231,10 @@ async def async_setup_entry(
     async_add_entities(entities)
 
 
-class ResideoSensor(CoordinatorEntity[ResideoDataUpdateCoordinator], SensorEntity):
+class ResideoSensor(ResideoEntity, SensorEntity):
     """Representation of a Resideo sensor."""
 
     entity_description: ResideoSensorEntityDescription
-    _attr_has_entity_name = True
 
     def __init__(
         self,
@@ -247,38 +243,13 @@ class ResideoSensor(CoordinatorEntity[ResideoDataUpdateCoordinator], SensorEntit
         description: ResideoSensorEntityDescription,
     ) -> None:
         """Initialize the sensor."""
-        super().__init__(coordinator)
+        super().__init__(coordinator, device_id, description.key)
         self.entity_description = description
-        self._device_id = device_id
-        self._attr_unique_id = f"{device_id}_{description.key}"
-
-    @property
-    def device_info(self) -> DeviceInfo:
-        """Return device information."""
-        device_state = self.coordinator.data.get(self._device_id)
-        if device_state:
-            return DeviceInfo(
-                identifiers={(DOMAIN, self._device_id)},
-                name=device_state.name,
-                manufacturer="First Alert / Resideo",
-                model=device_state.sku or device_state.device_type,
-                sw_version=device_state.firmware_version,
-            )
-        return DeviceInfo(
-            identifiers={(DOMAIN, self._device_id)},
-            name=self._device_id,
-            manufacturer="First Alert / Resideo",
-        )
-
-    @property
-    def available(self) -> bool:
-        """Return if entity is available."""
-        return super().available and self._device_id in self.coordinator.data
 
     @property
     def native_value(self) -> Any:
         """Return the state of the sensor."""
-        device_state = self.coordinator.data.get(self._device_id)
+        device_state = self._device_state
         if device_state is None:
             return None
         return self.entity_description.value_fn(device_state)
