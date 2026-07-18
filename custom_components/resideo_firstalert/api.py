@@ -15,6 +15,7 @@ from .const import (
     API_ACCOUNTS_ENDPOINT,
     API_BASE_URL,
     API_DEVICE_STATE_ENDPOINT,
+    DEVICE_LIST_CACHE_SECONDS,
     OAUTH_CLIENT_ID,
     OAUTH_TOKEN_URL,
 )
@@ -31,7 +32,10 @@ class DeviceState:
     device_type: str
     sku: str
     is_online: bool
+    is_online_computed: bool
     is_supervision_healthy: bool
+    registration_status: str | None
+    data_sync_state: str | None
 
     # Alarm states
     smoke_state: str
@@ -42,6 +46,10 @@ class DeviceState:
     test_state: str
     silence_state: str
     eol_state: str
+
+    # Unix epoch timestamp (tStampEpoch) of when each alarm state last
+    # changed, keyed the same as the alarmState sub-objects above.
+    alarm_timestamps: dict[str, int | None]
 
     # Device config
     early_warning: bool | None
@@ -117,6 +125,8 @@ class ResideoApiClient:
         self._token_expiry: datetime | None = None
         self._lock = asyncio.Lock()
         self._on_refresh_token_updated = on_refresh_token_updated
+        self._devices_cache: list[dict[str, Any]] | None = None
+        self._devices_cache_time: datetime | None = None
 
     async def _ensure_token(self) -> str:
         """Ensure we have a valid access token."""
@@ -221,7 +231,19 @@ class ResideoApiClient:
         return await self._request("GET", endpoint)
 
     async def get_devices(self) -> list[dict[str, Any]]:
-        """Get all devices from the account."""
+        """Get all devices from the account.
+
+        Cached for DEVICE_LIST_CACHE_SECONDS so a short scan interval doesn't
+        re-fetch the full account/device list on every single poll.
+        """
+        if (
+            self._devices_cache is not None
+            and self._devices_cache_time is not None
+            and datetime.now() - self._devices_cache_time
+            < timedelta(seconds=DEVICE_LIST_CACHE_SECONDS)
+        ):
+            return self._devices_cache
+
         accounts_data = await self.get_accounts()
         devices = []
 
@@ -240,6 +262,8 @@ class ResideoApiClient:
                         "consumer_device_id": consumer_device.get("id"),
                     })
 
+        self._devices_cache = devices
+        self._devices_cache_time = datetime.now()
         return devices
 
     async def get_all_device_states(self) -> dict[str, DeviceState]:
@@ -276,13 +300,27 @@ class ResideoApiClient:
         device_config = reported.get("deviceConfig", {})
         status_flags = reported.get("deviceStatusFlags", {})
 
+        alarm_keys = (
+            "smoke",
+            "co",
+            "battery",
+            "power",
+            "malfunction",
+            "test",
+            "silence",
+            "eol",
+        )
+
         return DeviceState(
             device_id=state_data.get("name", device_info.get("device_id", "")),
             name=device_info.get("name", state_data.get("name", "Unknown")),
             device_type=state_data.get("deviceType", ""),
             sku=state_data.get("sku", ""),
             is_online=state_data.get("isOnline", False),
+            is_online_computed=state_data.get("isOnlineComputed", False),
             is_supervision_healthy=state_data.get("isSupervisionHealthy", False),
+            registration_status=state_data.get("registrationStatus"),
+            data_sync_state=state_data.get("dataSyncState"),
             # Alarm states
             smoke_state=alarm_state.get("smoke", {}).get("deviceState", "unknown"),
             co_state=alarm_state.get("co", {}).get("deviceState", "unknown"),
@@ -292,6 +330,9 @@ class ResideoApiClient:
             test_state=alarm_state.get("test", {}).get("deviceState", "unknown"),
             silence_state=alarm_state.get("silence", {}).get("deviceState", "unknown"),
             eol_state=alarm_state.get("eol", {}).get("deviceState", "unknown"),
+            alarm_timestamps={
+                key: alarm_state.get(key, {}).get("tStampEpoch") for key in alarm_keys
+            },
             # Device config
             early_warning=device_config.get("earlyWarning"),
             language=device_config.get("language"),
@@ -323,11 +364,3 @@ class ResideoApiClient:
             last_firmware_update_time=state_data.get("lastFirmwareUpdateTime"),
             raw_data=state_data,
         )
-
-    async def test_connection(self) -> bool:
-        """Test the connection to the API."""
-        try:
-            await self.get_accounts()
-            return True
-        except ResideoApiError:
-            return False

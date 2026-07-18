@@ -16,6 +16,11 @@ DEFAULT_SCAN_INTERVAL = 60  # seconds
 MIN_SCAN_INTERVAL = 5  # seconds
 MAX_SCAN_INTERVAL = 3600  # seconds (1 hour)
 
+# How long to reuse the account/device list before re-fetching it, so a fast
+# scan interval doesn't re-fetch the (rarely-changing) device list on every
+# single poll. New devices are still picked up once this expires.
+DEVICE_LIST_CACHE_SECONDS = 300  # seconds
+
 # Config keys
 CONF_REFRESH_TOKEN = "refresh_token"
 CONF_SCAN_INTERVAL = "scan_interval"

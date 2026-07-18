@@ -102,6 +102,20 @@ SENSOR_DESCRIPTIONS: tuple[ResideoSensorEntityDescription, ...] = (
     ),
     # Diagnostic sensors (disabled by default)
     ResideoSensorEntityDescription(
+        key="registration_status",
+        translation_key="registration_status",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda state: state.registration_status,
+    ),
+    ResideoSensorEntityDescription(
+        key="data_sync_state",
+        translation_key="data_sync_state",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda state: state.data_sync_state,
+    ),
+    ResideoSensorEntityDescription(
         key="room",
         translation_key="room",
         entity_category=EntityCategory.DIAGNOSTIC,

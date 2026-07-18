@@ -19,6 +19,7 @@ For each smoke/CO detector the integration creates:
 | Silenced | On when alarm is silenced | Enabled |
 | End of Life | On when device needs replacement | Enabled |
 | Early Warning | On when early warning is enabled | Enabled |
+| Connectivity (Computed) | On when device is online, per the API's computed status | Disabled |
 | Supervision Healthy | On when supervision is healthy | Disabled |
 | General Fault | On when general fault detected | Disabled |
 | E2 Fault | On when E2 fault detected | Disabled |
@@ -42,6 +43,8 @@ For each smoke/CO detector the integration creates:
 | End of Life Status | `no` or `yes` | Enabled |
 | Language | Device language setting | Enabled |
 | Last Seen | Timestamp of last communication | Enabled |
+| Registration Status | Device registration status (e.g. `Registered`) | Disabled |
+| Sync Status | Cloud data sync status (e.g. `Completed`) | Disabled |
 | Room | Room number setting | Disabled |
 | WiFi Signal Strength | Signal strength in dBm | Disabled |
 | WiFi Network | Connected SSID | Disabled |
@@ -122,10 +125,13 @@ After setup, click **Configure** on the integration card to change:
 
 - **Refresh token rotation** — Resideo occasionally rotates your refresh token when the access token is renewed. The integration detects this automatically and saves the new token to the config entry; no action is needed on your part.
 - **Token expiry** — access tokens expire hourly and are refreshed automatically in the background. If the refresh token itself expires (~30 days) or is revoked, Home Assistant will prompt you to re-authenticate from the integration card.
-- **Polling, not push** — the Resideo API has no real-time push channel, so all state comes from polling on the configured interval. A shorter interval detects a real alarm faster but makes more API calls.
-- **New devices** — a detector added to your Resideo account after setup is picked up automatically on the next poll; there's no need to remove and re-add the integration.
+- **Reauthenticating with the wrong account** — if you reauthenticate with credentials for a different Resideo account than the one originally configured, the integration detects the mismatch and aborts instead of silently repointing the entry at a different account.
+- **Polling, not push** — the Resideo API has no real-time push channel, so all state comes from polling on the configured interval. A shorter interval detects a real alarm faster but makes more API calls. The device list itself (used to detect new devices) is refreshed at most once every 5 minutes regardless of your polling interval, to avoid redundant calls.
+- **New devices** — a detector added to your Resideo account after setup is picked up automatically (within the 5-minute device-list refresh above); there's no need to remove and re-add the integration.
+- **Removed devices** — once a detector no longer appears in your Resideo account, its device page in Home Assistant can be manually deleted (three-dot menu → **Delete**). Devices still reporting state can't be deleted this way.
 - **Unknown data defaults to safe** — if the Resideo API omits or returns an unrecognized value for an alarm field, the corresponding binary sensor treats it as the safe/off state rather than reporting a false alarm.
 - **Availability** — entities go unavailable if a device drops off the Resideo cloud or a poll for it fails, and recover automatically once a subsequent poll succeeds.
+- **Last-changed timestamps** — the smoke, CO, malfunction, battery, test, silenced, and end-of-life binary sensors expose a `last_changed` attribute with the timestamp the API last reported for that state, useful for confirming whether (and when) an event actually arrived from the API.
 
 ## Example Automations
 
@@ -197,6 +203,10 @@ automation:
 
 ## Troubleshooting
 
+### Diagnostics
+
+On the device page in Home Assistant, click the three-dot menu → **Download diagnostics**. The report includes the parsed and raw device state for each detector, plus current options. The refresh token, access token, and WiFi SSID are automatically redacted. Attach this when opening an issue.
+
 ### Common Errors
 
 - **"Invalid email or password"** — double-check your credentials; these are the same as your First Alert / Resideo app login.
@@ -260,6 +270,15 @@ docker compose logs -f homeassistant
 
 # Stop
 docker compose down
+```
+
+### Running Tests
+
+The test suite covers `api.py` and `auth.py` (the parts of the integration with no Home Assistant dependency) with mocked HTTP calls:
+
+```bash
+pip install -r requirements-test.txt
+PYTHONPATH=custom_components python -m pytest tests/ -v
 ```
 
 ## Privacy Note
