@@ -56,7 +56,7 @@ SENSOR_DESCRIPTIONS: tuple[ResideoSensorEntityDescription, ...] = (
         key="power_source",
         translation_key="power_source",
         device_class=SensorDeviceClass.ENUM,
-        options=["ac", "battery", "unknown"],
+        options=["ac", "battery", "dc", "unknown"],
         value_fn=lambda state: state.power_state,
     ),
     ResideoSensorEntityDescription(

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any
@@ -107,6 +108,7 @@ class ResideoApiClient:
         self,
         session: aiohttp.ClientSession,
         refresh_token: str,
+        on_refresh_token_updated: Callable[[str], None] | None = None,
     ) -> None:
         """Initialize the API client."""
         self._session = session
@@ -114,6 +116,7 @@ class ResideoApiClient:
         self._access_token: str | None = None
         self._token_expiry: datetime | None = None
         self._lock = asyncio.Lock()
+        self._on_refresh_token_updated = on_refresh_token_updated
 
     async def _ensure_token(self) -> str:
         """Ensure we have a valid access token."""
@@ -152,6 +155,13 @@ class ResideoApiClient:
                 expires_in = data.get("expires_in", 3600)
                 self._token_expiry = datetime.now() + timedelta(seconds=expires_in)
                 _LOGGER.debug("Access token refreshed, expires in %s seconds", expires_in)
+
+                new_refresh_token = data.get("refresh_token")
+                if new_refresh_token and new_refresh_token != self._refresh_token:
+                    _LOGGER.debug("Refresh token rotated, persisting new token")
+                    self._refresh_token = new_refresh_token
+                    if self._on_refresh_token_updated:
+                        self._on_refresh_token_updated(new_refresh_token)
 
         except aiohttp.ClientError as err:
             raise ResideoConnectionError(f"Connection error: {err}") from err

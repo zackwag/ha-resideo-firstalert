@@ -172,6 +172,7 @@
         "state": {
           "ac": "AC Power",
           "battery": "Battery",
+          "dc": "DC Power",
           "unknown": "Unknown"
         }
       },

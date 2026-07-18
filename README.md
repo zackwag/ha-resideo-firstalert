@@ -114,7 +114,7 @@ For each smoke detector, the following entities are created:
 | Entity | Description | Default |
 |--------|-------------|---------|
 | Battery Status | `good` or `low` | Enabled |
-| Power Source | `ac` or `battery` | Enabled |
+| Power Source | `ac`, `battery`, or `dc` | Enabled |
 | Smoke Status | `idle` or `alarm` | Enabled |
 | CO Status | `idle` or `alarm` | Enabled |
 | Test Status | `idle` or `testing` | Enabled |
