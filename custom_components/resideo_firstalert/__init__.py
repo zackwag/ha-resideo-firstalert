@@ -7,7 +7,7 @@ from datetime import timedelta
 from typing import TYPE_CHECKING
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import Platform
+from homeassistant.const import CONF_TOKEN, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
@@ -32,8 +32,17 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     refresh_token = entry.data[CONF_REFRESH_TOKEN]
     scan_interval = entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
 
+    def _persist_refresh_token(new_refresh_token: str) -> None:
+        """Persist a rotated refresh token to the config entry."""
+        new_data = {**entry.data, CONF_REFRESH_TOKEN: new_refresh_token}
+        if CONF_TOKEN in entry.data:
+            new_data[CONF_TOKEN] = {"refresh_token": new_refresh_token}
+        hass.config_entries.async_update_entry(entry, data=new_data)
+
     session = async_get_clientsession(hass)
-    client = ResideoApiClient(session, refresh_token)
+    client = ResideoApiClient(
+        session, refresh_token, on_refresh_token_updated=_persist_refresh_token
+    )
 
     # Test the connection
     try:

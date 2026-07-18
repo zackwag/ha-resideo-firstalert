@@ -8,7 +8,6 @@ logger:
   default: info
   logs:
     custom_components.resideo_firstalert: debug
-    homeassistant.components.application_credentials: debug
 
 # Allow local network access without auth for development
 http:

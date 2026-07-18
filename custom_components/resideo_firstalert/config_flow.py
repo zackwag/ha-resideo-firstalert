@@ -8,17 +8,16 @@ from typing import Any
 import voluptuous as vol
 from homeassistant.config_entries import (
     ConfigEntry,
+    ConfigFlow,
     ConfigFlowResult,
     OptionsFlow,
 )
 from homeassistant.const import CONF_TOKEN
 from homeassistant.core import callback
-from homeassistant.helpers import config_entry_oauth2_flow
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import (
     ResideoApiClient,
-    ResideoApiError,
     ResideoAuthError,
     ResideoConnectionError,
 )
@@ -30,36 +29,19 @@ from .const import (
     DOMAIN,
     MAX_SCAN_INTERVAL,
     MIN_SCAN_INTERVAL,
-    OAUTH_SCOPES,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class ResideoOAuth2FlowHandler(
-    config_entry_oauth2_flow.AbstractOAuth2FlowHandler, domain=DOMAIN
-):
-    """Handle the OAuth2 config flow for Resideo."""
-
-    DOMAIN = DOMAIN
+class ResideoConfigFlow(ConfigFlow, domain=DOMAIN):
+    """Handle the config flow for Resideo."""
 
     @staticmethod
     @callback
     def async_get_options_flow(config_entry: ConfigEntry) -> OptionsFlow:
         """Get the options flow for this handler."""
         return ResideoOptionsFlowHandler()
-
-    @property
-    def logger(self) -> logging.Logger:
-        """Return logger."""
-        return _LOGGER
-
-    @property
-    def extra_authorize_data(self) -> dict[str, Any]:
-        """Extra data for authorization URL."""
-        return {
-            "scope": OAUTH_SCOPES,
-        }
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -142,12 +124,6 @@ class ResideoOAuth2FlowHandler(
             errors=errors,
         )
 
-    async def async_step_oauth(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
-        """Handle OAuth flow."""
-        return await self.async_step_pick_implementation()
-
     async def async_step_manual(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
@@ -202,42 +178,6 @@ class ResideoOAuth2FlowHandler(
                 "docs_url": "https://github.com/zackwag/ha-resideo-firstalert#getting-your-refresh-token"
             },
         )
-
-    async def async_oauth_create_entry(self, data: dict[str, Any]) -> ConfigFlowResult:
-        """Create entry from OAuth data."""
-        token = data.get(CONF_TOKEN, {})
-        refresh_token = token.get("refresh_token")
-
-        if not refresh_token:
-            return self.async_abort(reason="no_refresh_token")
-
-        # Test the token and get user info
-        session = async_get_clientsession(self.hass)
-        client = ResideoApiClient(session, refresh_token)
-
-        try:
-            accounts = await client.get_accounts()
-            account_data = accounts.get("data", {})
-            email = account_data.get("contactEmail", "unknown")
-            user_id = account_data.get("id", "unknown")
-            first_name = account_data.get("firstName", "")
-            last_name = account_data.get("lastName", "")
-
-            await self.async_set_unique_id(user_id)
-            self._abort_if_unique_id_configured()
-
-            title = f"First Alert ({email})"
-            if first_name:
-                title = f"First Alert ({first_name} {last_name})"
-
-            # Store refresh token in data for our API client
-            data[CONF_REFRESH_TOKEN] = refresh_token
-
-            return self.async_create_entry(title=title, data=data)
-
-        except ResideoApiError as err:
-            _LOGGER.error("Failed to verify OAuth token: %s", err)
-            return self.async_abort(reason="oauth_error")
 
     async def async_step_reauth(
         self, entry_data: dict[str, Any]
@@ -302,12 +242,6 @@ class ResideoOAuth2FlowHandler(
             }),
             errors=errors,
         )
-
-    async def async_step_reauth_oauth(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
-        """Handle reauth via OAuth."""
-        return await self.async_step_pick_implementation()
 
     async def async_step_reauth_manual(
         self, user_input: dict[str, Any] | None = None
