@@ -5,9 +5,6 @@ DOMAIN = "resideo_firstalert"
 # OAuth Configuration
 OAUTH_CLIENT_ID = "SRmiA7CaYi1JgivDZdzzoZu4X5VBogGt"
 OAUTH_TOKEN_URL = "https://login.resideo.com/oauth/token"
-OAUTH_AUTHORIZE_URL = "https://login.resideo.com/authorize"
-OAUTH_AUDIENCE = "https://resideo-prod.auth0.com/api/v2/"
-OAUTH_SCOPES = "openid profile email offline_access"
 
 # API Configuration
 API_BASE_URL = "https://api.resideo.com"

@@ -21,7 +21,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .api import DeviceState
 from .coordinator import ResideoDataUpdateCoordinator
-from .entity import ResideoEntity
+from .entity import ResideoEntity, async_add_entities_for_devices
 
 PARALLEL_UPDATES = 0  # Coordinator handles all updates
 
@@ -217,18 +217,19 @@ async def async_setup_entry(
     """Set up Resideo sensors from a config entry."""
     coordinator = entry.runtime_data
 
-    entities: list[ResideoSensor] = []
-    for device_id, device_state in coordinator.data.items():
-        for description in SENSOR_DESCRIPTIONS:
-            entities.append(
-                ResideoSensor(
-                    coordinator=coordinator,
-                    device_id=device_id,
-                    description=description,
-                )
+    def _entities_for_device(device_id: str) -> list[ResideoSensor]:
+        return [
+            ResideoSensor(
+                coordinator=coordinator,
+                device_id=device_id,
+                description=description,
             )
+            for description in SENSOR_DESCRIPTIONS
+        ]
 
-    async_add_entities(entities)
+    async_add_entities_for_devices(
+        coordinator, entry, async_add_entities, _entities_for_device
+    )
 
 
 class ResideoSensor(ResideoEntity, SensorEntity):

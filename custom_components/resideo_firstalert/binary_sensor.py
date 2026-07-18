@@ -26,7 +26,7 @@ from .const import (
     ALARM_STATE_UNKNOWN,
 )
 from .coordinator import ResideoDataUpdateCoordinator
-from .entity import ResideoEntity
+from .entity import ResideoEntity, async_add_entities_for_devices
 
 PARALLEL_UPDATES = 0  # Coordinator handles all updates
 
@@ -177,18 +177,19 @@ async def async_setup_entry(
     """Set up Resideo binary sensors from a config entry."""
     coordinator = entry.runtime_data
 
-    entities: list[ResideoBinarySensor] = []
-    for device_id, device_state in coordinator.data.items():
-        for description in BINARY_SENSOR_DESCRIPTIONS:
-            entities.append(
-                ResideoBinarySensor(
-                    coordinator=coordinator,
-                    device_id=device_id,
-                    description=description,
-                )
+    def _entities_for_device(device_id: str) -> list[ResideoBinarySensor]:
+        return [
+            ResideoBinarySensor(
+                coordinator=coordinator,
+                device_id=device_id,
+                description=description,
             )
+            for description in BINARY_SENSOR_DESCRIPTIONS
+        ]
 
-    async_add_entities(entities)
+    async_add_entities_for_devices(
+        coordinator, entry, async_add_entities, _entities_for_device
+    )
 
 
 class ResideoBinarySensor(ResideoEntity, BinarySensorEntity):
