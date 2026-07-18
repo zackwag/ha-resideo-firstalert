@@ -1,113 +1,33 @@
-# First Alert by Resideo - Home Assistant Integration
+# First Alert by Resideo — Home Assistant HACS Integration
 
-A custom Home Assistant integration for First Alert Safe & Sound smoke/CO detectors connected via the Resideo platform.
+A HACS custom integration for First Alert Safe & Sound smoke/CO detectors, reverse-engineered from the First Alert app's Resideo/Auth0 OAuth flow and REST API. Polls the Resideo cloud for device state — there is no push channel available from the platform.
 
-## Supported Devices
+## Entities
 
-- First Alert Safe & Sound Smart Smoke/CO Alarm (SMCO600NVACA)
-- Other Resideo-connected First Alert devices may also work
-
-## Features
-
-- **Easy Setup** - Login with your Resideo email and password directly
-- **Smoke Alarm Detection** - Binary sensor that triggers when smoke is detected
-- **CO Alarm Detection** - Binary sensor that triggers when carbon monoxide is detected
-- **Battery Monitoring** - Track battery status and get low battery alerts
-- **Power Source** - See if device is on AC or battery power
-- **Connectivity Status** - Know if your detector is online
-- **Malfunction Detection** - Get alerts if the device has issues
-- **Test Mode & Silence Status** - Monitor when detectors are in test mode or silenced
-- **Early Warning** - Track early warning feature status
-- **End of Life Alerts** - Know when your detector needs replacement
-- **Comprehensive Fault Detection** - Monitor various fault conditions
-- **Configurable Polling** - Adjust update interval from 5 seconds to 1 hour
-
-## Installation
-
-### HACS (Recommended)
-
-1. Open HACS in Home Assistant
-2. Click the three dots menu → Custom repositories
-3. Add `https://github.com/zackwag/ha-resideo-firstalert` with category "Integration"
-4. Search for "First Alert by Resideo" and install
-5. Restart Home Assistant
-
-### Manual Installation
-
-1. Copy the `custom_components/resideo_firstalert` folder to your Home Assistant `config/custom_components/` directory
-2. Restart Home Assistant
-
-## Configuration
-
-### Authentication
-
-When adding the integration, you have two options:
-
-#### Option 1: Login with Email & Password (Recommended)
-
-1. Go to **Settings** → **Devices & Services** → **Add Integration**
-2. Search for "First Alert by Resideo"
-3. Select **"Login with email and password"**
-4. Enter your Resideo account credentials (same as the First Alert app)
-5. Your devices will be automatically discovered
-
-#### Option 2: Manual Token Entry
-
-If you prefer, you can manually obtain and enter a refresh token:
-
-1. **Install a network proxy** like [Proxyman](https://proxyman.io/) (macOS/iOS) or [mitmproxy](https://mitmproxy.org/)
-
-2. **Configure SSL interception** for `login.resideo.com`
-
-3. **Log into the First Alert app** on your phone while capturing traffic
-
-4. **Look for the request** to `POST https://login.resideo.com/oauth/token`
-
-5. **Find the `refresh_token`** in the response JSON:
-   ```json
-   {
-     "access_token": "...",
-     "refresh_token": "THIS_IS_YOUR_TOKEN",
-     "expires_in": 3600,
-     "token_type": "Bearer"
-   }
-   ```
-
-6. In Home Assistant, select **"Enter refresh token manually"** and paste your token
-
-### Options
-
-After setup, you can configure the integration via **Settings** → **Devices & Services** → **First Alert by Resideo** → **Configure**:
-
-- **Settings** - Adjust the polling interval (5-3600 seconds, default: 60)
-- **Update refresh token** - Enter a new token if needed without recreating the integration
-
-## Entities Created
-
-For each smoke detector, the following entities are created:
+For each smoke/CO detector the integration creates:
 
 ### Binary Sensors
 
-| Entity | Description | Device Class | Default |
-|--------|-------------|--------------|---------|
-| Smoke Alarm | On when smoke is detected | `smoke` | Enabled |
-| CO Alarm | On when CO is detected | `co` | Enabled |
-| Malfunction | On when device has a problem | `problem` | Enabled |
-| Connectivity | On when device is online | `connectivity` | Enabled |
-| Battery Low | On when battery is low | `battery` | Enabled |
-| Test Mode | On when device is in test mode | `running` | Enabled |
-| Silenced | On when alarm is silenced | - | Enabled |
-| End of Life | On when device needs replacement | `problem` | Enabled |
-| Early Warning | On when early warning is enabled | - | Enabled |
-| Supervision Healthy | On when supervision is healthy | - | Disabled |
-| General Fault | On when general fault detected | `problem` | Disabled |
-| E2 Fault | On when E2 fault detected | `problem` | Disabled |
-| Photo Sensor Fault | On when photo sensor fault detected | `problem` | Disabled |
-| Drift Malfunction | On when drift malfunction detected | `problem` | Disabled |
-| CO Sensor Fault | On when CO sensor fault detected | `problem` | Disabled |
-| Temperature Sensor Fault | On when temp sensor fault detected | `problem` | Disabled |
-| Voice Module Fault | On when voice module fault detected | `problem` | Disabled |
-| Radio Fault | On when radio fault detected | `problem` | Disabled |
+| Entity | Description | Default |
+|--------|-------------|---------|
+| Smoke Alarm | On when smoke is detected | Enabled |
+| CO Alarm | On when CO is detected | Enabled |
+| Malfunction | On when device has a problem | Enabled |
+| Connectivity | On when device is online | Enabled |
+| Battery Low | On when battery is low | Enabled |
+| Test Mode | On when device is in test mode | Enabled |
+| Silenced | On when alarm is silenced | Enabled |
+| End of Life | On when device needs replacement | Enabled |
+| Early Warning | On when early warning is enabled | Enabled |
+| Supervision Healthy | On when supervision is healthy | Disabled |
+| General Fault | On when general fault detected | Disabled |
+| E2 Fault | On when E2 fault detected | Disabled |
+| Photo Sensor Fault | On when photo sensor fault detected | Disabled |
+| Drift Malfunction | On when drift malfunction detected | Disabled |
+| CO Sensor Fault | On when CO sensor fault detected | Disabled |
+| Temperature Sensor Fault | On when temp sensor fault detected | Disabled |
+| Voice Module Fault | On when voice module fault detected | Disabled |
+| Radio Fault | On when radio fault detected | Disabled |
 
 ### Sensors
 
@@ -121,10 +41,10 @@ For each smoke detector, the following entities are created:
 | Silence Status | `not_silenced` or `silenced` | Enabled |
 | End of Life Status | `no` or `yes` | Enabled |
 | Language | Device language setting | Enabled |
+| Last Seen | Timestamp of last communication | Enabled |
 | Room | Room number setting | Disabled |
 | WiFi Signal Strength | Signal strength in dBm | Disabled |
 | WiFi Network | Connected SSID | Disabled |
-| Last Seen | Timestamp of last communication | Enabled |
 | Firmware Version | Device firmware | Disabled |
 | Firmware (Exec Core) | Exec core firmware version | Disabled |
 | Firmware (Sensor Core) | Sensor core firmware version | Disabled |
@@ -135,6 +55,77 @@ For each smoke detector, the following entities are created:
 | Running Hours | Total running hours | Disabled |
 | Registration Date | When device was registered | Disabled |
 | Last Firmware Update | Last firmware update timestamp | Disabled |
+
+## Tested Devices
+
+| Device | Model |
+|--------|-------|
+| First Alert Safe & Sound Smart Smoke/CO Alarm | SMCO600NVACA |
+
+Other Resideo-connected First Alert devices may work but have not been verified. If yours does, please open an issue or PR to add it to this list.
+
+## Installation
+
+### HACS (recommended)
+
+1. In HA, go to **HACS → Integrations**
+2. Click the three-dot menu (top right) → **Custom repositories**
+3. Enter `https://github.com/zackwag/ha-resideo-firstalert` and set category to **Integration**
+4. Click **Add**, then find and install **First Alert by Resideo**
+5. Restart Home Assistant
+
+### Manual
+
+Copy `custom_components/resideo_firstalert/` into your HA `config/custom_components/` directory, then restart.
+
+## Setup
+
+1. Go to **Settings → Devices & Services → Add Integration → First Alert by Resideo**
+2. Choose **Login with email and password** (recommended) and enter your Resideo account credentials — the same ones used in the First Alert app
+3. Your devices are discovered automatically
+
+If you'd rather not enter your account password, choose **Enter refresh token manually** instead and see [Manual Token Entry](#manual-token-entry) below.
+
+## Manual Token Entry
+
+If you prefer not to use email/password login, you can supply a refresh token directly:
+
+1. Install a network proxy such as [Proxyman](https://proxyman.io/) (macOS/iOS) or [mitmproxy](https://mitmproxy.org/)
+2. Configure SSL interception for `login.resideo.com`
+3. Log into the First Alert app on your phone while capturing traffic
+4. Find the request to `POST https://login.resideo.com/oauth/token` and copy the `refresh_token` field from the response:
+   ```json
+   {
+     "access_token": "...",
+     "refresh_token": "THIS_IS_YOUR_TOKEN",
+     "expires_in": 3600,
+     "token_type": "Bearer"
+   }
+   ```
+5. In Home Assistant, select **Enter refresh token manually** and paste the token
+
+## Options
+
+After setup, click **Configure** on the integration card to change:
+
+| Option | Default | Description |
+|--------|---------|--------------|
+| Update interval | 60s | How often to poll the Resideo API for device state (5–3600 seconds). |
+| Update refresh token | — | Enter a new refresh token if your current one has expired, without recreating the integration. |
+
+## Requirements
+
+- [`python-dateutil`](https://pypi.org/project/python-dateutil/) `>= 2.8.2` (installed automatically) — used to parse device timestamps.
+- Home Assistant 2024.1.0 or newer
+
+## Notes
+
+- **Refresh token rotation** — Resideo occasionally rotates your refresh token when the access token is renewed. The integration detects this automatically and saves the new token to the config entry; no action is needed on your part.
+- **Token expiry** — access tokens expire hourly and are refreshed automatically in the background. If the refresh token itself expires (~30 days) or is revoked, Home Assistant will prompt you to re-authenticate from the integration card.
+- **Polling, not push** — the Resideo API has no real-time push channel, so all state comes from polling on the configured interval. A shorter interval detects a real alarm faster but makes more API calls.
+- **New devices** — a detector added to your Resideo account after setup is picked up automatically on the next poll; there's no need to remove and re-add the integration.
+- **Unknown data defaults to safe** — if the Resideo API omits or returns an unrecognized value for an alarm field, the corresponding binary sensor treats it as the safe/off state rather than reporting a false alarm.
+- **Availability** — entities go unavailable if a device drops off the Resideo cloud or a poll for it fails, and recover automatically once a subsequent poll succeeds.
 
 ## Example Automations
 
@@ -206,46 +197,31 @@ automation:
 
 ## Troubleshooting
 
-### "Invalid email or password" error
-Double-check your credentials. These are the same as your First Alert / Resideo app login.
+### Common Errors
 
-### "Authentication failed" error
-Your refresh token may have expired. Use the **Configure** option to update your token, or re-authenticate with email/password.
+- **"Invalid email or password"** — double-check your credentials; these are the same as your First Alert / Resideo app login.
+- **"Authentication failed"** — your refresh token may have expired. Use **Configure** to update it, or re-authenticate with email/password.
+- **"Unable to connect"** — check your internet connection and verify the Resideo API is accessible.
+- **Devices not showing** — make sure your devices are set up in the First Alert app and are online.
 
-### "Unable to connect" error
-Check your internet connection and verify the Resideo API is accessible.
+### Debug logging
 
-### Devices not showing
-Make sure your devices are properly set up in the First Alert app and are online.
+Enable debug logging in `configuration.yaml`:
 
-### Token Expiration
-- **Access tokens** expire hourly and are automatically refreshed
-- **Refresh tokens** expire after ~30 days. When this happens, Home Assistant will prompt you to re-authenticate
+```yaml
+logger:
+  default: info
+  logs:
+    custom_components.resideo_firstalert: debug
+```
 
 ## Removing the Integration
 
-To remove the First Alert by Resideo integration:
-
-1. Go to **Settings** → **Devices & Services**
-2. Find "First Alert by Resideo" and click on it
+1. Go to **Settings → Devices & Services**
+2. Find **First Alert by Resideo** and click on it
 3. Click the three-dot menu → **Delete**
-4. Confirm the deletion
 
-All entities and device data will be removed. No additional cleanup is required.
-
-## Technical Details
-
-- **Polling Interval**: 60 seconds (configurable from 5-3600 seconds)
-- **API Base URL**: `https://api.resideo.com`
-- **Authentication**: OAuth 2.0 with PKCE via Auth0
-
-## Privacy Note
-
-This integration communicates with Resideo's cloud servers. Your device data passes through their infrastructure. The integration stores only the refresh token locally - your email and password are not stored.
-
-## License
-
-MIT License - See LICENSE file for details.
+All entities and device data are removed. No additional cleanup is required.
 
 ## Local Development
 
@@ -261,27 +237,19 @@ MIT License - See LICENSE file for details.
    git clone https://github.com/zackwag/ha-resideo-firstalert.git
    cd ha-resideo-firstalert
    ```
-
 2. Create the config file:
    ```bash
    cp config/configuration.yaml.example config/configuration.yaml
    ```
-
 3. Start Home Assistant:
    ```bash
    docker compose up -d
    ```
-
-4. Open http://localhost:8123 in your browser
-
-5. Complete the Home Assistant onboarding, then add the integration:
-   - Settings → Devices & Services → Add Integration
-   - Search "First Alert by Resideo"
-   - Login with your email and password
+4. Open http://localhost:8123, complete onboarding, then add the integration via **Settings → Devices & Services → Add Integration → First Alert by Resideo**
 
 ### Development Workflow
 
-The `custom_components` folder is mounted directly into the container, so changes to the integration code take effect after restarting Home Assistant:
+The `custom_components` folder is mounted directly into the container, so code changes take effect after a restart:
 
 ```bash
 # Restart to pick up code changes
@@ -294,16 +262,13 @@ docker compose logs -f homeassistant
 docker compose down
 ```
 
-### Debug Logging
+## Privacy Note
 
-The example configuration enables debug logging for the integration. View logs with:
-```bash
-docker compose logs -f homeassistant 2>&1 | grep resideo_firstalert
-```
+This integration communicates with Resideo's cloud servers, so your device data passes through their infrastructure. Only the refresh token is stored locally — your email and password are not stored.
 
-## Contributing
+## License
 
-Contributions welcome! Please open an issue or PR on GitHub.
+MIT License — see the [LICENSE](LICENSE) file for details.
 
 ## Disclaimer
 
