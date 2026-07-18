@@ -214,6 +214,10 @@ class ResideoConfigFlow(ConfigFlow, domain=DOMAIN):
                 if not refresh_token:
                     errors["base"] = "no_refresh_token"
                 else:
+                    # Verify the token actually works before committing it
+                    client = ResideoApiClient(session, refresh_token)
+                    await client.get_accounts()
+
                     return self.async_update_reload_and_abort(
                         self._get_reauth_entry(),
                         data_updates={
@@ -228,6 +232,8 @@ class ResideoConfigFlow(ConfigFlow, domain=DOMAIN):
                     errors["base"] = "invalid_auth"
                 else:
                     errors["base"] = "auth_error"
+            except ResideoAuthError:
+                errors["base"] = "invalid_auth"
             except ResideoConnectionError:
                 errors["base"] = "cannot_connect"
             except Exception:

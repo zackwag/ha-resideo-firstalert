@@ -12,7 +12,12 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .api import ResideoApiClient, ResideoAuthError, ResideoConnectionError
+from .api import (
+    ResideoApiClient,
+    ResideoApiError,
+    ResideoAuthError,
+    ResideoConnectionError,
+)
 from .const import CONF_REFRESH_TOKEN, CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
 from .coordinator import ResideoDataUpdateCoordinator
 
@@ -46,12 +51,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # Test the connection
     try:
-        if not await client.test_connection():
-            raise ConfigEntryNotReady("Failed to connect to Resideo API")
+        await client.get_accounts()
     except ResideoAuthError as err:
         raise ConfigEntryAuthFailed("Invalid authentication") from err
     except ResideoConnectionError as err:
         raise ConfigEntryNotReady(f"Connection error: {err}") from err
+    except ResideoApiError as err:
+        raise ConfigEntryNotReady(f"Failed to connect to Resideo API: {err}") from err
 
     # Create the coordinator
     coordinator = ResideoDataUpdateCoordinator(hass, client, scan_interval)

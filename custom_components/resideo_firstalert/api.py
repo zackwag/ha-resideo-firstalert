@@ -323,11 +323,3 @@ class ResideoApiClient:
             last_firmware_update_time=state_data.get("lastFirmwareUpdateTime"),
             raw_data=state_data,
         )
-
-    async def test_connection(self) -> bool:
-        """Test the connection to the API."""
-        try:
-            await self.get_accounts()
-            return True
-        except ResideoApiError:
-            return False
