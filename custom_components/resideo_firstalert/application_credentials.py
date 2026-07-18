@@ -15,13 +15,7 @@ from homeassistant.components.application_credentials import (
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_entry_oauth2_flow
 
-from .const import (
-    DOMAIN,
-    OAUTH_AUTHORIZE_URL,
-    OAUTH_TOKEN_URL,
-    OAUTH_AUDIENCE,
-    OAUTH_SCOPES,
-)
+from .const import OAUTH_AUDIENCE, OAUTH_AUTHORIZE_URL, OAUTH_TOKEN_URL
 
 
 class ResideoOAuth2Implementation(AuthImplementation):
@@ -116,7 +110,7 @@ async def async_get_auth_implementation(
 async def async_get_description_placeholders(hass: HomeAssistant) -> dict[str, str]:
     """Return description placeholders for the credentials form."""
     return {
-        "more_info_url": "https://github.com/aidenmitchell/ha-resideo-firstalert#oauth-setup",
+        "more_info_url": "https://github.com/zackwag/ha-resideo-firstalert#oauth-setup",
         "oauth_consent_url": OAUTH_AUTHORIZE_URL,
-        "oauth_creds_url": "https://github.com/aidenmitchell/ha-resideo-firstalert#getting-started",
+        "oauth_creds_url": "https://github.com/zackwag/ha-resideo-firstalert#getting-started",
     }
