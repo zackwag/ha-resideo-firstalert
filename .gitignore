@@ -1,0 +1,32 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code
+.claude/
+
+# HAR files (contain sensitive tokens)
+*.har
+
+# Local testing - ignore everything in config except the sample
+config/*
+!config/configuration.yaml.example
+
+# HACS integration (installed during testing)
+custom_components/hacs/

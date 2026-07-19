@@ -1,0 +1,25 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+permissions: {}
+
+jobs:
+  pytest:
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: Checkout
+        uses: "actions/checkout@v4"
+
+      - name: Set up Python
+        uses: "actions/setup-python@v5"
+        with:
+          python-version: "3.13"
+
+      - name: Install test dependencies
+        run: pip install -r requirements-test.txt
+
+      - name: Run tests
+        run: PYTHONPATH=custom_components python -m pytest tests/ -v

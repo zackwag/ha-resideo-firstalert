@@ -1,0 +1,269 @@
+{
+  "options": {
+    "step": {
+      "init": {
+        "title": "Configure First Alert by Resideo",
+        "menu_options": {
+          "settings": "Settings",
+          "update_token": "Update refresh token"
+        }
+      },
+      "settings": {
+        "title": "Settings",
+        "data": {
+          "scan_interval": "Update interval (seconds)"
+        },
+        "data_description": {
+          "scan_interval": "How often to poll the Resideo API for updates (5-3600 seconds)"
+        }
+      },
+      "update_token": {
+        "title": "Update Refresh Token",
+        "description": "Enter a new refresh token if your current one has expired.",
+        "data": {
+          "refresh_token": "Refresh Token"
+        }
+      }
+    }
+  },
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to First Alert by Resideo",
+        "description": "Choose how you want to authenticate with your Resideo account.\n\nSee the [documentation]({docs_url}) for more information.",
+        "menu_options": {
+          "login": "Login with email and password (Recommended)",
+          "manual": "Enter refresh token manually"
+        }
+      },
+      "login": {
+        "title": "Login to Resideo",
+        "description": "Enter your Resideo account credentials. These are the same credentials you use in the First Alert app.",
+        "data": {
+          "email": "Email",
+          "password": "Password"
+        }
+      },
+      "manual": {
+        "title": "Manual Token Entry",
+        "description": "Enter your refresh token to connect your First Alert smoke detectors.\n\nSee the [documentation]({docs_url}) for instructions on how to obtain your refresh token.",
+        "data": {
+          "refresh_token": "Refresh Token"
+        },
+        "data_description": {
+          "refresh_token": "The refresh token obtained from the Resideo API"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Reauthenticate",
+        "description": "Your authentication has expired. Please choose how to reauthenticate.",
+        "menu_options": {
+          "reauth_login": "Login with email and password",
+          "reauth_manual": "Enter refresh token manually"
+        }
+      },
+      "reauth_login": {
+        "title": "Reauthenticate with Resideo",
+        "description": "Enter your Resideo account credentials to restore your connection.",
+        "data": {
+          "email": "Email",
+          "password": "Password"
+        }
+      },
+      "reauth_manual": {
+        "title": "Reauthenticate with Token",
+        "description": "Enter a new refresh token to restore your connection.",
+        "data": {
+          "refresh_token": "Refresh Token"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid email or password",
+      "cannot_connect": "Unable to connect to Resideo API",
+      "unknown": "An unknown error occurred",
+      "auth_error": "Authentication failed - please try again",
+      "no_refresh_token": "Login succeeded but no refresh token was returned",
+      "account_mismatch": "This refresh token belongs to a different Resideo account than the one currently configured"
+    },
+    "abort": {
+      "already_configured": "This account is already configured",
+      "reauth_successful": "Reauthentication successful",
+      "reauth_account_mismatch": "The credentials you entered belong to a different Resideo account than the one being reauthenticated. Please use the account originally configured for this integration entry."
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "smoke": {
+        "name": "Smoke Alarm"
+      },
+      "connectivity_computed": {
+        "name": "Connectivity (Computed)"
+      },
+      "co": {
+        "name": "CO Alarm"
+      },
+      "malfunction": {
+        "name": "Malfunction"
+      },
+      "connectivity": {
+        "name": "Connectivity"
+      },
+      "battery_low": {
+        "name": "Battery Low"
+      },
+      "test_mode": {
+        "name": "Test Mode"
+      },
+      "silenced": {
+        "name": "Silenced"
+      },
+      "end_of_life": {
+        "name": "End of Life"
+      },
+      "early_warning": {
+        "name": "Early Warning"
+      },
+      "supervision_healthy": {
+        "name": "Supervision Healthy"
+      },
+      "fault": {
+        "name": "General Fault"
+      },
+      "e2_fault": {
+        "name": "E2 Fault"
+      },
+      "photo_fault": {
+        "name": "Photo Sensor Fault"
+      },
+      "drift_malfunction": {
+        "name": "Drift Malfunction"
+      },
+      "co_fault": {
+        "name": "CO Sensor Fault"
+      },
+      "temperature_fault": {
+        "name": "Temperature Sensor Fault"
+      },
+      "voice_fault": {
+        "name": "Voice Module Fault"
+      },
+      "radio_fault": {
+        "name": "Radio Fault"
+      }
+    },
+    "sensor": {
+      "battery_status": {
+        "name": "Battery Status",
+        "state": {
+          "good": "Good",
+          "low": "Low",
+          "unknown": "Unknown"
+        }
+      },
+      "power_source": {
+        "name": "Power Source",
+        "state": {
+          "ac": "AC Power",
+          "battery": "Battery",
+          "dc": "DC Power",
+          "unknown": "Unknown"
+        }
+      },
+      "smoke_status": {
+        "name": "Smoke Status",
+        "state": {
+          "idle": "Clear",
+          "alarm": "Alarm",
+          "unknown": "Unknown"
+        }
+      },
+      "co_status": {
+        "name": "CO Status",
+        "state": {
+          "idle": "Clear",
+          "alarm": "Alarm",
+          "unknown": "Unknown"
+        }
+      },
+      "test_status": {
+        "name": "Test Status",
+        "state": {
+          "idle": "Idle",
+          "testing": "Testing",
+          "unknown": "Unknown"
+        }
+      },
+      "silence_status": {
+        "name": "Silence Status",
+        "state": {
+          "not_silenced": "Not Silenced",
+          "silenced": "Silenced",
+          "unknown": "Unknown"
+        }
+      },
+      "eol_status": {
+        "name": "End of Life Status",
+        "state": {
+          "no": "No",
+          "yes": "Yes",
+          "unknown": "Unknown"
+        }
+      },
+      "language": {
+        "name": "Language"
+      },
+      "registration_status": {
+        "name": "Registration Status"
+      },
+      "data_sync_state": {
+        "name": "Sync Status"
+      },
+      "debug_level": {
+        "name": "Debug Level"
+      },
+      "room": {
+        "name": "Room"
+      },
+      "wifi_signal_strength": {
+        "name": "WiFi Signal Strength"
+      },
+      "wifi_ssid": {
+        "name": "WiFi Network"
+      },
+      "last_seen": {
+        "name": "Last Seen"
+      },
+      "firmware_version": {
+        "name": "Firmware Version"
+      },
+      "fw_ver_exec_core": {
+        "name": "Firmware (Exec Core)"
+      },
+      "fw_ver_sensor_core": {
+        "name": "Firmware (Sensor Core)"
+      },
+      "hw_ver_e2c": {
+        "name": "Hardware Version (E2C)"
+      },
+      "hw_ver_exec_core": {
+        "name": "Hardware Version (Exec Core)"
+      },
+      "hw_ver_sensor_core": {
+        "name": "Hardware Version (Sensor Core)"
+      },
+      "voice_file_version": {
+        "name": "Voice File Version"
+      },
+      "running_hours": {
+        "name": "Running Hours"
+      },
+      "registration_date": {
+        "name": "Registration Date"
+      },
+      "last_firmware_update": {
+        "name": "Last Firmware Update"
+      }
+    }
+  }
+}
