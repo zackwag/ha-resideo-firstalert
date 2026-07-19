@@ -359,19 +359,39 @@ class ResideoOptionsFlowHandler(OptionsFlow):
             client = ResideoApiClient(session, refresh_token)
 
             try:
-                await client.get_accounts()
+                accounts = await client.get_accounts()
+                account_data = accounts.get("data", {})
+                user_id = account_data.get("id")
 
-                # Update the config entry data with new token
-                new_data = {**self.config_entry.data, CONF_REFRESH_TOKEN: refresh_token}
-                if CONF_TOKEN in self.config_entry.data:
-                    new_data[CONF_TOKEN] = {"refresh_token": refresh_token}
+                if (
+                    user_id
+                    and self.config_entry.unique_id
+                    and user_id != self.config_entry.unique_id
+                ):
+                    errors["base"] = "account_mismatch"
+                else:
+                    # Update the config entry data with new token
+                    new_data = {
+                        **self.config_entry.data,
+                        CONF_REFRESH_TOKEN: refresh_token,
+                    }
+                    if CONF_TOKEN in self.config_entry.data:
+                        new_data[CONF_TOKEN] = {"refresh_token": refresh_token}
 
-                self.hass.config_entries.async_update_entry(
-                    self.config_entry,
-                    data=new_data,
-                )
+                    self.hass.config_entries.async_update_entry(
+                        self.config_entry,
+                        data=new_data,
+                    )
+                    # Reload so the running API client picks up the new
+                    # token immediately, instead of continuing to use the
+                    # stale one until the next manual reload or restart.
+                    await self.hass.config_entries.async_reload(
+                        self.config_entry.entry_id
+                    )
 
-                return self.async_create_entry(title="", data=self.config_entry.options)
+                    return self.async_create_entry(
+                        title="", data=self.config_entry.options
+                    )
 
             except ResideoAuthError:
                 errors["base"] = "invalid_auth"
