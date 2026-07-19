@@ -29,7 +29,11 @@ SCOPE = "openid profile email offline_access"
 TENANT = "resideo-prod"
 CONNECTION = "Username-Password-Authentication"
 
-# Auth0 client identifiers (base64 encoded JSON)
+# Auth0-Client header values: base64-encoded {"name": ..., "version": ...}
+# library-identification JSON that Auth0's SDKs send with every request for
+# their own telemetry. Not credentials - just identify which Auth0 client
+# library and version made the request. Decode them yourself to check:
+#   base64.b64decode(AUTH0_CLIENT_BROWSER)
 AUTH0_CLIENT_BROWSER = "eyJuYW1lIjoiYXV0aDAuanMtdWxwIiwidmVyc2lvbiI6IjkuMTMuMiJ9"
 AUTH0_CLIENT_APP = "eyJ2ZXJzaW9uIjoiMS4xNC4wIiwibmFtZSI6ImF1dGgwLWZsdXR0ZXIiLCJlbnYiOnsiY29yZSI6IjIuMTAuMCIsImlPUyI6IjI2LjEiLCJzd2lmdCI6IjUueCJ9fQ"
 

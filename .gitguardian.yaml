@@ -1,0 +1,9 @@
+version: 2
+secret:
+  ignored_matches:
+    - name: Resideo OAuth PKCE client_id (public - same value shipped in the official First Alert app binary; PKCE public clients have no client_secret)
+      match: SRmiA7CaYi1JgivDZdzzoZu4X5VBogGt
+    - name: Auth0-Client header for auth0.js-ulp (base64 JSON library/version identifier, not a credential)
+      match: eyJuYW1lIjoiYXV0aDAuanMtdWxwIiwidmVyc2lvbiI6IjkuMTMuMiJ9
+    - name: Auth0-Client header for auth0-flutter (base64 JSON library/version identifier, not a credential)
+      match: eyJ2ZXJzaW9uIjoiMS4xNC4wIiwibmFtZSI6ImF1dGgwLWZsdXR0ZXIiLCJlbnYiOnsiY29yZSI6IjIuMTAuMCIsImlPUyI6IjI2LjEiLCJzd2lmdCI6IjUueCJ9fQ

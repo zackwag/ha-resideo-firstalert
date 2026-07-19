@@ -3,6 +3,10 @@
 DOMAIN = "resideo_firstalert"
 
 # OAuth Configuration
+# OAUTH_CLIENT_ID is a public PKCE client identifier, not a secret - it's the
+# same value shipped inside the official First Alert mobile app binary, where
+# it's trivially extractable by anyone. There is no client_secret; PKCE
+# public clients are designed not to need one.
 OAUTH_CLIENT_ID = "SRmiA7CaYi1JgivDZdzzoZu4X5VBogGt"
 OAUTH_TOKEN_URL = "https://login.resideo.com/oauth/token"
 
