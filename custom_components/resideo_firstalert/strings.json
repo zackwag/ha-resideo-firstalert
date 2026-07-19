@@ -83,7 +83,8 @@
       "cannot_connect": "Unable to connect to Resideo API",
       "unknown": "An unknown error occurred",
       "auth_error": "Authentication failed - please try again",
-      "no_refresh_token": "Login succeeded but no refresh token was returned"
+      "no_refresh_token": "Login succeeded but no refresh token was returned",
+      "account_mismatch": "This refresh token belongs to a different Resideo account than the one currently configured"
     },
     "abort": {
       "already_configured": "This account is already configured",
