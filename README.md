@@ -287,6 +287,10 @@ PYTHONPATH=custom_components python -m pytest tests/ -v
 
 This integration communicates with Resideo's cloud servers, so your device data passes through their infrastructure. Only the refresh token is stored locally — your email and password are not stored.
 
+## Credits
+
+This project was originally started by [Aiden Mitchell](https://github.com/aidenmitchell), who did the initial reverse-engineering of the Resideo API and built the first version of this integration. It hadn't been updated in about 7 months, so this fork has picked up active development.
+
 ## License
 
 MIT License — see the [LICENSE](LICENSE) file for details.
