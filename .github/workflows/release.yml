@@ -1,0 +1,43 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release (e.g. 1.0.0) - must match custom_components/resideo_firstalert/manifest.json"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: Checkout
+        uses: "actions/checkout@v4"
+        with:
+          fetch-depth: 0
+
+      - name: Verify manifest version matches input
+        run: |
+          MANIFEST_VERSION=$(python3 -c "import json; print(json.load(open('custom_components/resideo_firstalert/manifest.json'))['version'])")
+          if [ "$MANIFEST_VERSION" != "${{ inputs.version }}" ]; then
+            echo "::error::manifest.json version ($MANIFEST_VERSION) does not match requested release version (${{ inputs.version }})"
+            exit 1
+          fi
+
+      - name: Create and push tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "v${{ inputs.version }}" -m "v${{ inputs.version }}"
+          git push origin "v${{ inputs.version }}"
+
+      - name: Create GitHub Release
+        uses: "softprops/action-gh-release@v2"
+        with:
+          tag_name: "v${{ inputs.version }}"
+          name: "v${{ inputs.version }}"
+          generate_release_notes: true
