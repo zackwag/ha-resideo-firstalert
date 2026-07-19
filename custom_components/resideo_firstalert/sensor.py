@@ -41,6 +41,18 @@ class ResideoSensorEntityDescription(SensorEntityDescription):
     """Describes a Resideo sensor entity."""
 
     value_fn: Callable[[DeviceState], Any]
+    icon_fn: Callable[[DeviceState], str | None] | None = None
+
+
+# ac = hardwired to mains; dc/battery both mean "running on a DC source"
+# (typically the internal battery - see RESIDEO_API.md for how we confirmed
+# this against the official app), so both get the battery icon.
+_POWER_SOURCE_ICONS = {
+    "ac": "mdi:power-plug",
+    "dc": "mdi:battery",
+    "battery": "mdi:battery",
+    "unknown": "mdi:help-circle-outline",
+}
 
 
 SENSOR_DESCRIPTIONS: tuple[ResideoSensorEntityDescription, ...] = (
@@ -58,6 +70,7 @@ SENSOR_DESCRIPTIONS: tuple[ResideoSensorEntityDescription, ...] = (
         device_class=SensorDeviceClass.ENUM,
         options=["ac", "battery", "dc", "unknown"],
         value_fn=lambda state: state.power_state,
+        icon_fn=lambda state: _POWER_SOURCE_ICONS.get(state.power_state),
     ),
     ResideoSensorEntityDescription(
         key="smoke_status",
@@ -275,3 +288,13 @@ class ResideoSensor(ResideoEntity, SensorEntity):
         if device_state is None:
             return None
         return self.entity_description.value_fn(device_state)
+
+    @property
+    def icon(self) -> str | None:
+        """Return a dynamic icon if this sensor has one, else the default."""
+        if self.entity_description.icon_fn is None:
+            return super().icon
+        device_state = self._device_state
+        if device_state is None:
+            return super().icon
+        return self.entity_description.icon_fn(device_state) or super().icon

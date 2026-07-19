@@ -237,10 +237,17 @@ GET /ris-public-api/api/v2/devices/smokeDetectors/{deviceId}/state
 | `low` | Battery low (assumed) |
 
 ### `alarmState.power.deviceState`
+
+This field classifies the *type of electrical current* powering the device,
+not "battery vs. plugged in" - it's a different axis from `alarmState.battery`
+(battery presence/health, reported separately regardless of what's currently
+powering the device).
+
 | Value | Description |
 |-------|-------------|
-| `ac` | Running on AC power |
-| `battery` | Running on battery (assumed) |
+| `ac` | Hardwired into 120V AC mains |
+| `dc` | Powered by DC current. Confirmed via the official First Alert app: a battery-only SC5 unit (SMCO600NVACA) shows "Power Source: DC" alongside a separate "Battery Status: Good" - since a battery is itself a DC source, this is the expected value for battery-only installations, not a distinct "external DC adapter" mode. |
+| `battery` | Present in earlier reverse-engineering notes as a guessed/assumed value, but not confirmed on any device tested so far - every battery-powered detector observed reports `dc`, not `battery`. Kept as a valid enum option in case some other device/model does return it. |
 
 ### `alarmState.malfunction.deviceState`
 | Value | Description |
