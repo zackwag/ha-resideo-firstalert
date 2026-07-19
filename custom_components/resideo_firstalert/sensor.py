@@ -116,6 +116,13 @@ SENSOR_DESCRIPTIONS: tuple[ResideoSensorEntityDescription, ...] = (
         value_fn=lambda state: state.data_sync_state,
     ),
     ResideoSensorEntityDescription(
+        key="debug_level",
+        translation_key="debug_level",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda state: state.debug_level,
+    ),
+    ResideoSensorEntityDescription(
         key="room",
         translation_key="room",
         entity_category=EntityCategory.DIAGNOSTIC,

@@ -29,6 +29,7 @@ class DeviceState:
 
     device_id: str
     name: str
+    location: str | None
     device_type: str
     sku: str
     is_online: bool
@@ -55,6 +56,7 @@ class DeviceState:
     early_warning: bool | None
     language: str | None
     room: int | None
+    debug_level: str | None
 
     # Device status
     rssi: int | None
@@ -314,6 +316,7 @@ class ResideoApiClient:
         return DeviceState(
             device_id=state_data.get("name", device_info.get("device_id", "")),
             name=device_info.get("name", state_data.get("name", "Unknown")),
+            location=device_info.get("location"),
             device_type=state_data.get("deviceType", ""),
             sku=state_data.get("sku", ""),
             is_online=state_data.get("isOnline", False),
@@ -337,6 +340,7 @@ class ResideoApiClient:
             early_warning=device_config.get("earlyWarning"),
             language=device_config.get("language"),
             room=device_config.get("room"),
+            debug_level=device_config.get("debugLevel"),
             # Device status
             rssi=device_status.get("rssi"),
             ssid=device_status.get("ssid"),

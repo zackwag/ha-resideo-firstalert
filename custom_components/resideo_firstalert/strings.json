@@ -219,6 +219,9 @@
       "data_sync_state": {
         "name": "Sync Status"
       },
+      "debug_level": {
+        "name": "Debug Level"
+      },
       "room": {
         "name": "Room"
       },

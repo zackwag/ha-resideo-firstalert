@@ -45,6 +45,7 @@ For each smoke/CO detector the integration creates:
 | Last Seen | Timestamp of last communication | Enabled |
 | Registration Status | Device registration status (e.g. `Registered`) | Disabled |
 | Sync Status | Cloud data sync status (e.g. `Completed`) | Disabled |
+| Debug Level | Device's configured debug log level | Disabled |
 | Room | Room number setting | Disabled |
 | WiFi Signal Strength | Signal strength in dBm | Disabled |
 | WiFi Network | Connected SSID | Disabled |
@@ -132,6 +133,7 @@ After setup, click **Configure** on the integration card to change:
 - **Unknown data defaults to safe** — if the Resideo API omits or returns an unrecognized value for an alarm field, the corresponding binary sensor treats it as the safe/off state rather than reporting a false alarm.
 - **Availability** — entities go unavailable if a device drops off the Resideo cloud or a poll for it fails, and recover automatically once a subsequent poll succeeds.
 - **Last-changed timestamps** — the smoke, CO, malfunction, battery, test, silenced, and end-of-life binary sensors expose a `last_changed` attribute with the timestamp the API last reported for that state, useful for confirming whether (and when) an event actually arrived from the API.
+- **Suggested Area** — each detector's Resideo location name (e.g. "Home", or a second property's name if your account has more than one) is passed to Home Assistant as a suggested Area on first setup, so devices land somewhere sensible without manual sorting.
 
 ## Example Automations
 

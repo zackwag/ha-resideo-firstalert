@@ -116,6 +116,7 @@ def _device_state_response(
                     "language": "en_US",
                     "room": 14,
                     "earlyWarning": True,
+                    "debugLevel": "error",
                 },
                 "deviceInfo": {
                     "hwVerE2C": "1.0.0",
@@ -271,7 +272,11 @@ async def test_get_devices_refetches_after_cache_expires(session) -> None:
 
 async def test_parse_device_state_full_response(session) -> None:
     client = ResideoApiClient(session, "refresh-token")
-    device_info = {"device_id": "DEVICE1", "name": "Living Room Detector"}
+    device_info = {
+        "device_id": "DEVICE1",
+        "name": "Living Room Detector",
+        "location": "Home",
+    }
 
     state = client._parse_device_state(
         _device_state_response(device_id="DEVICE1", smoke="idle"), device_info
@@ -279,11 +284,13 @@ async def test_parse_device_state_full_response(session) -> None:
 
     assert state.device_id == "DEVICE1"
     assert state.name == "Living Room Detector"
+    assert state.location == "Home"
     assert state.sku == "SMCO600NVACA"
     assert state.is_online is True
     assert state.is_online_computed is True
     assert state.registration_status == "Registered"
     assert state.data_sync_state == "Completed"
+    assert state.debug_level == "error"
     assert state.smoke_state == "idle"
     assert state.battery_state == "good"
     assert state.power_state == "ac"

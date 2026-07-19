@@ -48,6 +48,7 @@ class ResideoEntity(CoordinatorEntity[ResideoDataUpdateCoordinator]):
                 manufacturer="First Alert / Resideo",
                 model=device_state.sku or device_state.device_type,
                 sw_version=device_state.firmware_version,
+                suggested_area=device_state.location,
             )
         return DeviceInfo(
             identifiers={(DOMAIN, self._device_id)},
