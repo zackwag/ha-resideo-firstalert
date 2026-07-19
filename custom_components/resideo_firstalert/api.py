@@ -253,7 +253,7 @@ class ResideoApiClient:
         for consumer_user in data.get("consumerUsers", []):
             consumer_account = consumer_user.get("consumerAccount", {})
             for location in consumer_account.get("locations", []):
-                location_name = location.get("name", "Unknown")
+                location_name = location.get("name")
                 for consumer_device in location.get("consumerDevices", []):
                     device = consumer_device.get("device", {})
                     devices.append({
