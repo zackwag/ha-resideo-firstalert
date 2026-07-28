@@ -69,6 +69,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Store the coordinator
     entry.runtime_data = coordinator
 
+    # Start SignalR for real-time push notifications
+    await coordinator.async_start_signalr()
+
     # Set up platforms
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
@@ -88,6 +91,8 @@ async def async_options_updated(hass: HomeAssistant, entry: ConfigEntry) -> None
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
+    coordinator: ResideoDataUpdateCoordinator = entry.runtime_data
+    await coordinator.async_stop_signalr()
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
 
