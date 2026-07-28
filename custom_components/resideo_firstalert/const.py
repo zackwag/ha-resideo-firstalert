@@ -57,3 +57,24 @@ CO_ALARM_STATES = frozenset({
     "carbonMonoxideInterconnectAlarm",
     "carbonMonoxideEarlyWarningInterconnectAlarm",
 })
+
+# The API reports transitional power states during AC/DC switchovers.
+# Normalize them to the stable state the device is settling into.
+POWER_STATE_MAP: dict[str, str] = {
+    "ac": "ac",
+    "dc": "dc",
+    "battery": "battery",
+    "acOnly": "ac",
+    "acToDc": "dc",
+    "dcToAc": "ac",
+    "acLoss": "dc",
+    "acRestored": "ac",
+}
+
+# The API can return "replace" or "critical" alongside "good" and "low".
+BATTERY_STATE_MAP: dict[str, str] = {
+    "good": "good",
+    "low": "low",
+    "replace": "replace",
+    "critical": "critical",
+}
