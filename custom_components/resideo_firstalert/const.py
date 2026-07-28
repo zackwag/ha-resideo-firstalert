@@ -37,3 +37,23 @@ ALARM_STATE_UNKNOWN = "unknown"
 ALARM_STATE_SILENCED = "silenced"
 ALARM_STATE_EOL_YES = "yes"
 ALARM_STATE_TESTING = "testing"
+
+# All smoke/CO deviceState values that indicate an active alarm condition.
+# Derived from the official app's enum: idle is safe, everything else is alarming.
+SMOKE_ALARM_STATES = frozenset({
+    "alarm",
+    "smokeAlarm",
+    "smokeEarlyWarning",
+    "smokeInterconnectAlarm",
+    "smokeEarlyWarningInterconnectAlarm",
+})
+
+CO_ALARM_STATES = frozenset({
+    "alarm",
+    "coAlarm",
+    "coEarlyWarning",
+    "carbonMonoxideAlarm",
+    "carbonMonoxideEarlyWarning",
+    "carbonMonoxideInterconnectAlarm",
+    "carbonMonoxideEarlyWarningInterconnectAlarm",
+})
