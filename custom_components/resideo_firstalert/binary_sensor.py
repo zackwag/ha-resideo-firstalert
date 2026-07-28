@@ -246,12 +246,16 @@ class ResideoBinarySensor(ResideoEntity, BinarySensorEntity):
 
     @property
     def extra_state_attributes(self) -> dict[str, Any] | None:
-        """Return the last-changed timestamp for alarm-backed sensors."""
+        """Return extra attributes for alarm-backed sensors."""
         alarm_key = self.entity_description.alarm_key
         device_state = self._device_state
         if alarm_key is None or device_state is None:
             return None
+        attrs: dict[str, Any] = {}
         last_changed = _epoch_to_iso(device_state.alarm_timestamps.get(alarm_key))
-        if last_changed is None:
-            return None
-        return {"last_changed": last_changed}
+        if last_changed is not None:
+            attrs["last_changed"] = last_changed
+        event_source = device_state.alarm_event_sources.get(alarm_key)
+        if event_source is not None:
+            attrs["event_source"] = event_source
+        return attrs or None
