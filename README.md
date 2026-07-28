@@ -18,7 +18,7 @@ For each smoke/CO detector the integration creates:
 ### Binary Sensors
 
 | Entity | Description | Default |
-|--------|-------------|---------|
+| -------- | ------------- | --------- |
 | Smoke Alarm | On when smoke is detected (includes early warning and interconnect states) | Enabled |
 | CO Alarm | On when CO is detected (includes early warning and interconnect states) | Enabled |
 | Malfunction | On when device has a problem | Enabled |
@@ -42,7 +42,7 @@ For each smoke/CO detector the integration creates:
 ### Sensors
 
 | Entity | Description | Default |
-|--------|-------------|---------|
+| -------- | ------------- | --------- |
 | Battery Status | `good`, `low`, `replace`, or `critical` | Enabled |
 | Power Source | `ac`, `battery`, or `dc` (transitional states normalized) | Enabled |
 | Smoke Status | All app states: `idle`, `alarm`, `smokeAlarm`, `smokeEarlyWarning`, `smokeInterconnectAlarm`, `smokeEarlyWarningInterconnectAlarm` | Enabled |
@@ -74,7 +74,7 @@ For each smoke/CO detector the integration creates:
 Each device has an **Alarm Events** event entity that fires typed HA events on state changes:
 
 | Event Type | Trigger |
-|------------|---------|
+| ------------ | --------- |
 | `smoke_alarm` | Smoke alarm activated |
 | `smoke_early_warning` | Smoke early warning detected |
 | `smoke_interconnect_alarm` | Smoke alarm from interconnected device |
@@ -103,7 +103,7 @@ Events include `state` and `event_source` data attributes. Events only fire on s
 The integration raises repair issues in **Settings → System → Repairs** for persistent device problems:
 
 | Issue | Condition |
-|-------|-----------|
+| ------- | ----------- |
 | Device offline | Offline for 3+ consecutive polls |
 | End of life | Immediately on EOL/warning/expired |
 | Persistent fault | Any fault flag active for 2+ consecutive polls |
@@ -114,7 +114,7 @@ Repairs auto-resolve when the condition clears.
 
 | Device | Model |
 |--------|-------|
-| First Alert Safe & Sound Smart Smoke/CO Alarm | SMCO600NVACA |
+| First Alert Safe & Sound Smart Smoke/CO Alarm (Wired and Wireless) | SMCO600NV/AC |
 
 Other Resideo-connected First Alert devices may work but have not been verified. If yours does, please open an issue or PR to add it to this list.
 
@@ -148,6 +148,7 @@ If you prefer not to use email/password login, you can supply a refresh token di
 2. Configure SSL interception for `login.resideo.com`
 3. Log into the First Alert app on your phone while capturing traffic
 4. Find the request to `POST https://login.resideo.com/oauth/token` and copy the `refresh_token` field from the response:
+
    ```json
    {
      "access_token": "...",
@@ -156,6 +157,7 @@ If you prefer not to use email/password login, you can supply a refresh token di
      "token_type": "Bearer"
    }
    ```
+
 5. In Home Assistant, select **Enter refresh token manually** and paste the token
 
 ## Options
@@ -163,7 +165,7 @@ If you prefer not to use email/password login, you can supply a refresh token di
 After setup, click **Configure** on the integration card to change:
 
 | Option | Default | Description |
-|--------|---------|--------------|
+| -------- | --------- | -------------- |
 | Update interval | 60s | How often to poll the Resideo API for device state (5–3600 seconds). |
 | Update refresh token | — | Enter a new refresh token if your current one has expired, without recreating the integration. |
 
@@ -188,6 +190,7 @@ After setup, click **Configure** on the integration card to change:
 ## Example Automations
 
 ### Alert on Smoke Detection
+
 ```yaml
 automation:
   - alias: "Smoke Alarm Alert"
@@ -206,6 +209,7 @@ automation:
 ```
 
 ### Alert on CO Detection
+
 ```yaml
 automation:
   - alias: "CO Alarm Alert"
@@ -224,6 +228,7 @@ automation:
 ```
 
 ### Low Battery Alert
+
 ```yaml
 automation:
   - alias: "Smoke Detector Low Battery"
@@ -239,6 +244,7 @@ automation:
 ```
 
 ### End of Life Alert
+
 ```yaml
 automation:
   - alias: "Smoke Detector End of Life"
@@ -254,6 +260,7 @@ automation:
 ```
 
 ### Using Event Entities (Interconnect Detection)
+
 ```yaml
 automation:
   - alias: "Interconnect Smoke Alarm"
@@ -314,19 +321,25 @@ All entities and device data are removed. No additional cleanup is required.
 ### Quick Start
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/zackwag/ha-resideo-firstalert.git
    cd ha-resideo-firstalert
    ```
+
 2. Create the config file:
+
    ```bash
    cp config/configuration.yaml.example config/configuration.yaml
    ```
+
 3. Start Home Assistant:
+
    ```bash
    docker compose up -d
    ```
-4. Open http://localhost:8123, complete onboarding, then add the integration via **Settings → Devices & Services → Add Integration → First Alert by Resideo**
+
+4. Open <http://localhost:8123>, complete onboarding, then add the integration via **Settings → Devices & Services → Add Integration → First Alert by Resideo**
 
 ### Development Workflow
 
