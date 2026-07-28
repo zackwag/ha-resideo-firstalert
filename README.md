@@ -1,6 +1,15 @@
 # First Alert by Resideo — Home Assistant HACS Integration
 
-A HACS custom integration for First Alert Safe & Sound smoke/CO detectors, reverse-engineered from the First Alert app's Resideo/Auth0 OAuth flow and REST API. Polls the Resideo cloud for device state — there is no push channel available from the platform.
+A HACS custom integration for First Alert Safe & Sound smoke/CO detectors, reverse-engineered from the First Alert app's Resideo/Auth0 OAuth flow and REST API. Combines cloud polling with real-time SignalR push notifications for near-instant alarm detection.
+
+## Features
+
+- **Full alarm state detection** — recognizes all alarm variants from the official app, including early warning, interconnect, and direct alarm states for both smoke and CO
+- **Real-time push notifications** — maintains a SignalR WebSocket connection to the Resideo notification service, triggering an immediate refresh when device state changes
+- **Event entities** — fires typed Home Assistant events on state changes (smoke alarm, CO alarm, battery low, AC power loss, etc.) for use in automations
+- **Identify button** — chirps/flashes a detector to help locate it physically
+- **Repairs integration** — raises persistent repair issues for devices that are offline, faulted, or at end-of-life
+- **Power & battery normalization** — handles transitional power states (`acToDc`, `acLoss`, `acRestored`, etc.) and extended battery states (`replace`, `critical`)
 
 ## Entities
 
@@ -10,14 +19,14 @@ For each smoke/CO detector the integration creates:
 
 | Entity | Description | Default |
 |--------|-------------|---------|
-| Smoke Alarm | On when smoke is detected | Enabled |
-| CO Alarm | On when CO is detected | Enabled |
+| Smoke Alarm | On when smoke is detected (includes early warning and interconnect states) | Enabled |
+| CO Alarm | On when CO is detected (includes early warning and interconnect states) | Enabled |
 | Malfunction | On when device has a problem | Enabled |
 | Connectivity | On when device is online | Enabled |
-| Battery Low | On when battery is low | Enabled |
+| Battery Low | On when battery is low, needs replacement, or is critical | Enabled |
 | Test Mode | On when device is in test mode | Enabled |
 | Silenced | On when alarm is silenced | Enabled |
-| End of Life | On when device needs replacement | Enabled |
+| End of Life | On when device needs replacement (includes `eolWarning` and `expired`) | Enabled |
 | Early Warning | On when early warning is enabled | Enabled |
 | Connectivity (Computed) | On when device is online, per the API's computed status | Disabled |
 | Supervision Healthy | On when supervision is healthy | Disabled |
@@ -34,13 +43,13 @@ For each smoke/CO detector the integration creates:
 
 | Entity | Description | Default |
 |--------|-------------|---------|
-| Battery Status | `good` or `low` | Enabled |
-| Power Source | `ac`, `battery`, or `dc` | Enabled |
-| Smoke Status | `idle` or `alarm` | Enabled |
-| CO Status | `idle` or `alarm` | Enabled |
+| Battery Status | `good`, `low`, `replace`, or `critical` | Enabled |
+| Power Source | `ac`, `battery`, or `dc` (transitional states normalized) | Enabled |
+| Smoke Status | All app states: `idle`, `alarm`, `smokeAlarm`, `smokeEarlyWarning`, `smokeInterconnectAlarm`, `smokeEarlyWarningInterconnectAlarm` | Enabled |
+| CO Status | All app states: `idle`, `alarm`, `coAlarm`, `coEarlyWarning`, `carbonMonoxideAlarm`, `carbonMonoxideEarlyWarning`, `carbonMonoxideInterconnectAlarm`, `carbonMonoxideEarlyWarningInterconnectAlarm` | Enabled |
 | Test Status | `idle` or `testing` | Enabled |
 | Silence Status | `not_silenced` or `silenced` | Enabled |
-| End of Life Status | `no` or `yes` | Enabled |
+| End of Life Status | `no`, `yes`, `eolWarning`, or `expired` | Enabled |
 | Language | Device language setting | Enabled |
 | Last Seen | Timestamp of last communication | Enabled |
 | Registration Status | Device registration status (e.g. `Registered`) | Disabled |
@@ -59,6 +68,47 @@ For each smoke/CO detector the integration creates:
 | Running Hours | Total running hours | Disabled |
 | Registration Date | When device was registered | Disabled |
 | Last Firmware Update | Last firmware update timestamp | Disabled |
+
+### Event Entity
+
+Each device has an **Alarm Events** event entity that fires typed HA events on state changes:
+
+| Event Type | Trigger |
+|------------|---------|
+| `smoke_alarm` | Smoke alarm activated |
+| `smoke_early_warning` | Smoke early warning detected |
+| `smoke_interconnect_alarm` | Smoke alarm from interconnected device |
+| `co_alarm` | CO alarm activated |
+| `co_early_warning` | CO early warning detected |
+| `co_interconnect_alarm` | CO alarm from interconnected device |
+| `battery_low` | Battery level low |
+| `battery_replace` | Battery critical / needs replacement |
+| `power_ac_loss` | AC power lost |
+| `power_ac_restored` | AC power restored |
+| `malfunction` | Device malfunction detected |
+| `end_of_life` | Device reached end of life |
+| `silence` | Alarm silenced |
+| `test` | Self-test initiated |
+
+Events include `state` and `event_source` data attributes. Events only fire on state *changes* — the initial load on startup does not trigger events.
+
+### Button
+
+| Entity | Description |
+|--------|-------------|
+| Identify | Chirps/flashes the detector to help locate it physically |
+
+### Repairs
+
+The integration raises repair issues in **Settings → System → Repairs** for persistent device problems:
+
+| Issue | Condition |
+|-------|-----------|
+| Device offline | Offline for 3+ consecutive polls |
+| End of life | Immediately on EOL/warning/expired |
+| Persistent fault | Any fault flag active for 2+ consecutive polls |
+
+Repairs auto-resolve when the condition clears.
 
 ## Tested Devices
 
@@ -127,12 +177,12 @@ After setup, click **Configure** on the integration card to change:
 - **Refresh token rotation** — Resideo occasionally rotates your refresh token when the access token is renewed. The integration detects this automatically and saves the new token to the config entry; no action is needed on your part.
 - **Token expiry** — access tokens expire hourly and are refreshed automatically in the background. If the refresh token itself expires (~30 days) or is revoked, Home Assistant will prompt you to re-authenticate from the integration card.
 - **Using credentials for the wrong account** — if you reauthenticate, or use **Update refresh token**, with credentials for a different Resideo account than the one originally configured, the integration detects the mismatch and rejects it instead of silently repointing the entry at a different account.
-- **Polling, not push** — the Resideo API has no real-time push channel, so all state comes from polling on the configured interval. A shorter interval detects a real alarm faster but makes more API calls. The device list itself (used to detect new devices) is refreshed at most once every 5 minutes regardless of your polling interval, to avoid redundant calls.
+- **Polling + real-time push** — the integration polls on your configured interval as a baseline, but also maintains a SignalR WebSocket connection to the Resideo notification service. When a device state change occurs, the server pushes an event and the integration immediately refreshes — so alarms are typically detected within seconds, not on the next poll. The device list itself (used to detect new devices) is refreshed at most once every 5 minutes regardless of your polling interval.
 - **New devices** — a detector added to your Resideo account after setup is picked up automatically (within the 5-minute device-list refresh above); there's no need to remove and re-add the integration.
 - **Removed devices** — once a detector no longer appears in your Resideo account, its device page in Home Assistant can be manually deleted (three-dot menu → **Delete**). Devices still reporting state can't be deleted this way.
 - **Unknown data defaults to safe** — if the Resideo API omits or returns an unrecognized value for an alarm field, the corresponding binary sensor treats it as the safe/off state rather than reporting a false alarm.
 - **Availability** — entities go unavailable if a device drops off the Resideo cloud or a poll for it fails, and recover automatically once a subsequent poll succeeds.
-- **Last-changed timestamps** — the smoke, CO, malfunction, battery, test, silenced, and end-of-life binary sensors expose a `last_changed` attribute with the timestamp the API last reported for that state, useful for confirming whether (and when) an event actually arrived from the API.
+- **Last-changed timestamps** — the smoke, CO, malfunction, battery, test, silenced, and end-of-life binary sensors expose a `last_changed` attribute with the timestamp the API last reported for that state, useful for confirming whether (and when) an event actually arrived from the API. They also expose an `event_source` attribute (`self`, `node`, or `remote`) indicating whether the event originated from the device itself, a mesh node, or a remote interconnect.
 - **Suggested Area** — each detector's Resideo location name (e.g. "Home", or a second property's name if your account has more than one) is passed to Home Assistant as a suggested Area on first setup, so devices land somewhere sensible without manual sorting.
 
 ## Example Automations
@@ -201,6 +251,25 @@ automation:
         data:
           title: "Detector Replacement Needed"
           message: "Living Room smoke detector has reached end of life and should be replaced"
+```
+
+### Using Event Entities (Interconnect Detection)
+```yaml
+automation:
+  - alias: "Interconnect Smoke Alarm"
+    trigger:
+      - platform: state
+        entity_id: event.living_room_detector_alarm_events
+        attribute: event_type
+        to: "smoke_interconnect_alarm"
+    action:
+      - service: notify.mobile_app
+        data:
+          title: "INTERCONNECT SMOKE ALARM"
+          message: "A connected detector triggered the smoke alarm in Living Room"
+          data:
+            priority: high
+            ttl: 0
 ```
 
 ## Troubleshooting

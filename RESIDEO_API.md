@@ -218,23 +218,37 @@ GET /ris-public-api/api/v2/devices/smokeDetectors/{deviceId}/state
 
 ## Alarm State Values
 
+All values below are extracted from the official First Alert app (v2.25.2) via decompilation.
+
 ### `alarmState.smoke.deviceState`
 | Value | Description |
 |-------|-------------|
 | `idle` | Normal - no smoke detected |
-| `alarm` | Smoke alarm active |
+| `alarm` | Smoke alarm active (legacy/generic) |
+| `smokeAlarm` | Smoke alarm active |
+| `smokeEarlyWarning` | Smoke early warning (below alarm threshold) |
+| `smokeInterconnectAlarm` | Smoke alarm triggered by interconnected device |
+| `smokeEarlyWarningInterconnectAlarm` | Smoke early warning from interconnected device |
 
 ### `alarmState.co.deviceState`
 | Value | Description |
 |-------|-------------|
 | `idle` | Normal - no CO detected |
-| `alarm` | CO alarm active |
+| `alarm` | CO alarm active (legacy/generic) |
+| `coAlarm` | CO alarm active |
+| `coEarlyWarning` | CO early warning (below alarm threshold) |
+| `carbonMonoxideAlarm` | CO alarm active (alternate key) |
+| `carbonMonoxideEarlyWarning` | CO early warning (alternate key) |
+| `carbonMonoxideInterconnectAlarm` | CO alarm from interconnected device |
+| `carbonMonoxideEarlyWarningInterconnectAlarm` | CO early warning from interconnected device |
 
 ### `alarmState.battery.deviceState`
 | Value | Description |
 |-------|-------------|
 | `good` | Battery healthy |
-| `low` | Battery low (assumed) |
+| `low` | Battery low |
+| `replace` | Battery needs replacement |
+| `critical` | Battery critically low |
 
 ### `alarmState.power.deviceState`
 
@@ -243,11 +257,18 @@ not "battery vs. plugged in" - it's a different axis from `alarmState.battery`
 (battery presence/health, reported separately regardless of what's currently
 powering the device).
 
+The API also reports transitional states during power switchovers:
+
 | Value | Description |
 |-------|-------------|
 | `ac` | Hardwired into 120V AC mains |
 | `dc` | Powered by DC current. Confirmed via the official First Alert app: a battery-only SC5 unit (SMCO600NVACA) shows "Power Source: DC" alongside a separate "Battery Status: Good" - since a battery is itself a DC source, this is the expected value for battery-only installations, not a distinct "external DC adapter" mode. |
 | `battery` | Present in earlier reverse-engineering notes as a guessed/assumed value, but not confirmed on any device tested so far - every battery-powered detector observed reports `dc`, not `battery`. Kept as a valid enum option in case some other device/model does return it. |
+| `acOnly` | AC-only mode (no battery backup) |
+| `acToDc` | Transitioning from AC to DC (AC just lost) |
+| `dcToAc` | Transitioning from DC to AC (AC restoring) |
+| `acLoss` | AC power lost |
+| `acRestored` | AC power restored |
 
 ### `alarmState.malfunction.deviceState`
 | Value | Description |
@@ -265,7 +286,9 @@ powering the device).
 | Value | Description |
 |-------|-------------|
 | `no` | Not at end of life |
-| `yes` | End of life - replace device (assumed) |
+| `yes` | End of life - replace device |
+| `eolWarning` | Approaching end of life |
+| `expired` | Past end of life |
 
 ### `alarmState.test.deviceState`
 | Value | Description |
@@ -273,13 +296,97 @@ powering the device).
 | `idle` | Not in test mode |
 | `testing` | Test in progress (assumed) |
 
+### `eventSource` field
+
+Each alarm state object includes an `eventSource` field indicating the origin of the event:
+
+| Value | Description |
+|-------|-------------|
+| `self` | Event originated from this device |
+| `node` | Event relayed from a mesh node |
+| `remote` | Event from a remote interconnected device |
+
+---
+
+## Identify Endpoint
+
+Chirps/flashes the detector LED to help locate it physically.
+
+```http
+POST /ris-public-api/api/v2/devices/smokeDetectors/{deviceId}/identify
+```
+
+No request body required. Returns `200 OK` on success.
+
+---
+
+## Activity Feed
+
+Retrieves the event/activity history for the account.
+
+```http
+POST https://api.resideo.com/ds-activity-feed-api/api/v1/app/events
+Content-Type: application/json
+
+{
+  "deviceIds": ["XXXXXXXXXXXX"],
+  "pageSize": 50,
+  "pageNumber": 1
+}
+```
+
+---
+
+## SignalR Real-Time Notifications
+
+The platform supports real-time push notifications via ASP.NET Core SignalR over WebSocket.
+
+### Hub URL
+
+```
+https://ds-notification-service.prod.titans.cloud/Hub/
+```
+
+### Connection Flow
+
+1. **Negotiate** — `POST /Hub/negotiate?negotiateVersion=1` with Bearer token to get a `connectionId`
+2. **Connect** — open WebSocket to `wss://ds-notification-service.prod.titans.cloud/Hub/?id={connectionId}`
+3. **Handshake** — send `{"protocol":"json","version":1}\x1e`, wait for empty `{}\x1e` response
+4. **Subscribe** — invoke `SubscribeSignalRV2` with an array of device IDs:
+   ```json
+   {"type":1,"target":"SubscribeSignalRV2","arguments":[["DEVICE_ID_1","DEVICE_ID_2"]]}\x1e
+   ```
+5. **Listen** — server sends type 1 (invocation) messages on state changes, type 6 (ping) for keepalive
+
+### Message Types
+
+| Type | Meaning |
+|------|---------|
+| 1 | Invocation (server calling client method) |
+| 6 | Ping/Pong (keepalive) |
+| 7 | Close |
+
+All messages are JSON terminated by the ASCII record separator `\x1e`.
+
+---
+
+## BLE Commands (OpenWeave)
+
+The official app uses Bluetooth Low Energy via the OpenWeave protocol for certain device commands that are **not available through the cloud API**:
+
+| Command | Method |
+|---------|--------|
+| Self-test | `dev.flutter.pigeon.openweave.OpenWeaveHost.systemTest` |
+| Hush/Silence | `dev.flutter.pigeon.openweave.OpenWeaveHost.hush` |
+
+These require a direct BLE connection to the device and authentication using the `networkKey` from the device shadow's `CitadelSharedConfig`. The cloud API has no equivalent endpoint for triggering tests or silencing alarms remotely.
+
 ---
 
 ## Other Endpoints (Discovered)
 
 ```http
 GET /ris-public-api/api/v1/geofence
-POST /ds-activity-feed-api/api/v1/app/events
 ```
 
 ---
@@ -294,37 +401,27 @@ POST /ds-activity-feed-api/api/v1/app/events
 
 ## Home Assistant Integration Notes
 
-### Sensors to Expose
+### Entities Implemented
 
-1. **Binary Sensors:**
-   - Smoke Alarm (`alarmState.smoke.deviceState` != "idle")
-   - CO Alarm (`alarmState.co.deviceState` != "idle")
-   - Malfunction (`alarmState.malfunction.deviceState` != "none")
-   - Online Status (`isOnline`)
+1. **Binary Sensors:** Smoke Alarm, CO Alarm, Malfunction, Connectivity, Battery Low, Test Mode, Silenced, End of Life, Early Warning, plus fault flags (General, E2, Photo, Drift, CO, Temperature, Voice, Radio)
+2. **Sensors:** Battery Status, Power Source, Smoke Status, CO Status, Test Status, Silence Status, EOL Status, Language, Last Seen, WiFi, firmware/hardware versions, running hours, registration info
+3. **Event Entity:** Alarm Events (fires typed events on state changes)
+4. **Button:** Identify (chirps/flashes device)
+5. **Repairs:** Offline, EOL, and fault conditions
 
-2. **Sensors:**
-   - Battery Status (`alarmState.battery.deviceState`)
-   - Power Source (`alarmState.power.deviceState`)
-   - WiFi Signal Strength (`deviceStatus.rssi`)
-   - Last Message Time (`lastMessageReceivedTime`)
+### Real-Time Updates
 
-3. **Diagnostic Sensors:**
-   - Firmware versions
-   - End of Life status
-   - Various fault flags
+The integration uses both polling (configurable, default 60s) and SignalR push. When a SignalR event arrives, it triggers an immediate API refresh — so alarms are detected within seconds.
 
-### Polling Interval
+### Alarm Detection Logic
 
-Recommend polling every 30-60 seconds. The device reports timestamps in `tStampEpoch` format.
+Smoke and CO binary sensors trigger on the full set of alarm states (not just `"alarm"`), including early warning and interconnect variants. This ensures all alarm conditions from interconnected mesh networks are properly detected.
 
-### OAuth Flow for Home Assistant
+### OAuth Implementation
 
-For Home Assistant, you'll need to implement the full OAuth PKCE flow:
-1. Generate code_verifier and code_challenge
-2. Open browser to authorization URL
-3. Handle callback with authorization code
-4. Exchange code for tokens
-5. Store and refresh tokens as needed
+The integration supports two auth flows:
+1. **Email/password login** — performs the Auth0 Resource Owner Password Grant
+2. **Manual refresh token** — user supplies a token obtained via network proxy
 
 ---
 
