@@ -152,6 +152,31 @@
         "name": "Radio Fault"
       }
     },
+    "event": {
+      "alarm_event": {
+        "name": "Alarm Events",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "smoke_alarm": "Smoke Alarm",
+              "smoke_early_warning": "Smoke Early Warning",
+              "smoke_interconnect_alarm": "Smoke Interconnect Alarm",
+              "co_alarm": "CO Alarm",
+              "co_early_warning": "CO Early Warning",
+              "co_interconnect_alarm": "CO Interconnect Alarm",
+              "battery_low": "Battery Low",
+              "battery_replace": "Battery Replace",
+              "power_ac_loss": "AC Power Lost",
+              "power_ac_restored": "AC Power Restored",
+              "malfunction": "Malfunction",
+              "end_of_life": "End of Life",
+              "silence": "Alarm Silenced",
+              "test": "Test"
+            }
+          }
+        }
+      }
+    },
     "sensor": {
       "battery_status": {
         "name": "Battery Status",
