@@ -14,6 +14,7 @@ OAUTH_TOKEN_URL = "https://login.resideo.com/oauth/token"
 API_BASE_URL = "https://api.resideo.com"
 API_ACCOUNTS_ENDPOINT = "/ris-public-api/api/v1/accounts"
 API_DEVICE_STATE_ENDPOINT = "/ris-public-api/api/v2/devices/smokeDetectors/{device_id}/state"
+API_ACTIVITY_FEED_URL = "https://api.resideo.com/ds-activity-feed-api/api/v1/app/events"
 
 # Update interval
 DEFAULT_SCAN_INTERVAL = 60  # seconds

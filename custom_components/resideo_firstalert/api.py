@@ -13,6 +13,7 @@ import aiohttp
 
 from .const import (
     API_ACCOUNTS_ENDPOINT,
+    API_ACTIVITY_FEED_URL,
     API_BASE_URL,
     API_DEVICE_STATE_ENDPOINT,
     DEVICE_LIST_CACHE_SECONDS,
@@ -234,6 +235,59 @@ class ResideoApiClient:
         """Get the state of a specific device."""
         endpoint = API_DEVICE_STATE_ENDPOINT.format(device_id=device_id)
         return await self._request("GET", endpoint)
+
+    async def get_activity_feed(
+        self,
+        device_id: str,
+        start_date: str | None = None,
+        page_size: int = 20,
+    ) -> list[dict[str, Any]]:
+        """Get activity feed events for a device.
+
+        Returns a list of event dicts from the activity feed API.
+        start_date should be ISO 8601 format (e.g. "2025-01-01T00:00:00Z").
+        """
+        token = await self._ensure_token()
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/json",
+        }
+        params: dict[str, str] = {
+            "PageSize": str(page_size),
+            "deviceId": device_id,
+        }
+        if start_date:
+            params["startDate"] = start_date
+
+        try:
+            async with self._session.get(
+                API_ACTIVITY_FEED_URL, headers=headers, params=params
+            ) as response:
+                if response.status == 401:
+                    await self._refresh_access_token()
+                    headers["Authorization"] = f"Bearer {self._access_token}"
+                    async with self._session.get(
+                        API_ACTIVITY_FEED_URL, headers=headers, params=params
+                    ) as retry_response:
+                        if retry_response.status != 200:
+                            return []
+                        data = await retry_response.json()
+                        return data if isinstance(data, list) else data.get("events", [])
+
+                if response.status != 200:
+                    _LOGGER.debug(
+                        "Activity feed returned status %s for device %s",
+                        response.status,
+                        device_id,
+                    )
+                    return []
+
+                data = await response.json()
+                return data if isinstance(data, list) else data.get("events", [])
+
+        except aiohttp.ClientError as err:
+            _LOGGER.debug("Activity feed request failed: %s", err)
+            return []
 
     async def get_devices(self) -> list[dict[str, Any]]:
         """Get all devices from the account.
