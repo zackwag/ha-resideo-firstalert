@@ -236,6 +236,11 @@ class ResideoApiClient:
         endpoint = API_DEVICE_STATE_ENDPOINT.format(device_id=device_id)
         return await self._request("GET", endpoint)
 
+    async def identify_device(self, device_id: str) -> None:
+        """Send an identify command to make the device chirp/flash."""
+        endpoint = f"/ris-public-api/api/v2/devices/smokeDetectors/{device_id}/identify"
+        await self._request("POST", endpoint)
+
     async def get_activity_feed(
         self,
         device_id: str,
