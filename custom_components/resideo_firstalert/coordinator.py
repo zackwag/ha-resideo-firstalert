@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 from datetime import timedelta
+from typing import Any
 
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
@@ -11,6 +12,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from .api import DeviceState, ResideoApiClient, ResideoApiError, ResideoAuthError
 from .const import DEFAULT_SCAN_INTERVAL, DOMAIN
+from .signalr import SignalRClient
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -33,6 +35,39 @@ class ResideoDataUpdateCoordinator(DataUpdateCoordinator[dict[str, DeviceState]]
         )
         self.client = client
         self._last_update_success: bool | None = None
+        self._signalr: SignalRClient | None = None
+
+    async def async_start_signalr(self) -> None:
+        """Start the SignalR connection for real-time updates."""
+        if self._signalr is not None:
+            return
+
+        device_ids = list(self.data.keys()) if self.data else []
+        if not device_ids:
+            return
+
+        self._signalr = SignalRClient(
+            session=self.client._session,
+            get_access_token=self._get_signalr_token,
+            on_event=self._on_signalr_event,
+        )
+        await self._signalr.start(device_ids)
+        _LOGGER.debug("SignalR real-time connection started")
+
+    async def async_stop_signalr(self) -> None:
+        """Stop the SignalR connection."""
+        if self._signalr:
+            await self._signalr.stop()
+            self._signalr = None
+
+    def _get_signalr_token(self) -> str | None:
+        """Return the current access token for SignalR auth."""
+        return self.client._access_token
+
+    def _on_signalr_event(self, message: dict[str, Any]) -> None:
+        """Handle a SignalR event by triggering an immediate refresh."""
+        _LOGGER.debug("SignalR event received: %s", message.get("target"))
+        self.hass.async_create_task(self.async_request_refresh())
 
     async def _async_update_data(self) -> dict[str, DeviceState]:
         """Fetch data from the API."""
