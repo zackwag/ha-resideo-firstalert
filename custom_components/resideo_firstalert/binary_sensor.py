@@ -26,6 +26,8 @@ from .const import (
     ALARM_STATE_SILENCED,
     ALARM_STATE_TESTING,
     ALARM_STATE_UNKNOWN,
+    CO_ALARM_STATES,
+    SMOKE_ALARM_STATES,
 )
 from .coordinator import ResideoDataUpdateCoordinator
 from .entity import ResideoEntity, async_add_entities_for_devices
@@ -56,14 +58,14 @@ BINARY_SENSOR_DESCRIPTIONS: tuple[ResideoBinarySensorEntityDescription, ...] = (
         key="smoke",
         translation_key="smoke",
         device_class=BinarySensorDeviceClass.SMOKE,
-        value_fn=lambda state: state.smoke_state == ALARM_STATE_ALARM,
+        value_fn=lambda state: state.smoke_state in SMOKE_ALARM_STATES,
         alarm_key="smoke",
     ),
     ResideoBinarySensorEntityDescription(
         key="co",
         translation_key="co",
         device_class=BinarySensorDeviceClass.CO,
-        value_fn=lambda state: state.co_state == ALARM_STATE_ALARM,
+        value_fn=lambda state: state.co_state in CO_ALARM_STATES,
         alarm_key="co",
     ),
     ResideoBinarySensorEntityDescription(
