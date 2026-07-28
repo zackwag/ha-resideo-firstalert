@@ -20,6 +20,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .api import DeviceState
+from .const import BATTERY_STATE_MAP, POWER_STATE_MAP
 from .coordinator import ResideoDataUpdateCoordinator
 from .entity import ResideoEntity, async_add_entities_for_devices
 
@@ -61,16 +62,22 @@ SENSOR_DESCRIPTIONS: tuple[ResideoSensorEntityDescription, ...] = (
         key="battery_status",
         translation_key="battery_status",
         device_class=SensorDeviceClass.ENUM,
-        options=["good", "low", "unknown"],
-        value_fn=lambda state: state.battery_state,
+        options=["good", "low", "replace", "critical", "unknown"],
+        value_fn=lambda state: BATTERY_STATE_MAP.get(
+            state.battery_state, state.battery_state
+        ),
     ),
     ResideoSensorEntityDescription(
         key="power_source",
         translation_key="power_source",
         device_class=SensorDeviceClass.ENUM,
         options=["ac", "battery", "dc", "unknown"],
-        value_fn=lambda state: state.power_state,
-        icon_fn=lambda state: _POWER_SOURCE_ICONS.get(state.power_state),
+        value_fn=lambda state: POWER_STATE_MAP.get(
+            state.power_state, state.power_state
+        ),
+        icon_fn=lambda state: _POWER_SOURCE_ICONS.get(
+            POWER_STATE_MAP.get(state.power_state, state.power_state)
+        ),
     ),
     ResideoSensorEntityDescription(
         key="smoke_status",
@@ -122,7 +129,7 @@ SENSOR_DESCRIPTIONS: tuple[ResideoSensorEntityDescription, ...] = (
         key="eol_status",
         translation_key="eol_status",
         device_class=SensorDeviceClass.ENUM,
-        options=["no", "yes", "unknown"],
+        options=["no", "yes", "eolWarning", "expired", "unknown"],
         value_fn=lambda state: state.eol_state,
     ),
     # Configuration sensors (enabled by default)

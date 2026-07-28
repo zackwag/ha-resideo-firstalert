@@ -86,7 +86,7 @@ BINARY_SENSOR_DESCRIPTIONS: tuple[ResideoBinarySensorEntityDescription, ...] = (
         key="battery_low",
         translation_key="battery_low",
         device_class=BinarySensorDeviceClass.BATTERY,
-        value_fn=lambda state: state.battery_state == ALARM_STATE_LOW,
+        value_fn=lambda state: state.battery_state in ("low", "replace", "critical"),
         alarm_key="battery",
     ),
     # Additional alarm states (enabled by default)
@@ -107,7 +107,7 @@ BINARY_SENSOR_DESCRIPTIONS: tuple[ResideoBinarySensorEntityDescription, ...] = (
         key="end_of_life",
         translation_key="end_of_life",
         device_class=BinarySensorDeviceClass.PROBLEM,
-        value_fn=lambda state: state.eol_state == ALARM_STATE_EOL_YES,
+        value_fn=lambda state: state.eol_state in ("yes", "eolWarning", "expired"),
         alarm_key="eol",
     ),
     ResideoBinarySensorEntityDescription(
