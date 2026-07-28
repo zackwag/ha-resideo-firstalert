@@ -1,4 +1,18 @@
 {
+  "issues": {
+    "device_offline": {
+      "title": "{device_name} is offline",
+      "description": "The smoke/CO detector **{device_name}** has been offline for multiple consecutive checks. Verify the device has power and is within WiFi range."
+    },
+    "device_end_of_life": {
+      "title": "{device_name} has reached end of life",
+      "description": "The smoke/CO detector **{device_name}** has flagged end-of-life. The device should be replaced to ensure continued safety protection."
+    },
+    "device_fault": {
+      "title": "{device_name} has a persistent fault ({fault_type})",
+      "description": "The smoke/CO detector **{device_name}** is reporting a persistent **{fault_type}** fault. The device may need maintenance or replacement."
+    }
+  },
   "options": {
     "step": {
       "init": {

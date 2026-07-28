@@ -12,6 +12,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from .api import DeviceState, ResideoApiClient, ResideoApiError, ResideoAuthError
 from .const import DEFAULT_SCAN_INTERVAL, DOMAIN
+from .repairs import check_device_repairs
 from .signalr import SignalRClient
 
 _LOGGER = logging.getLogger(__name__)
@@ -36,6 +37,9 @@ class ResideoDataUpdateCoordinator(DataUpdateCoordinator[dict[str, DeviceState]]
         self.client = client
         self._last_update_success: bool | None = None
         self._signalr: SignalRClient | None = None
+        # Repairs tracking: per-device counters for persistence thresholds
+        self._consecutive_offline: dict[str, int] = {}
+        self._consecutive_faults: dict[str, dict[str, int]] = {}
 
     async def async_start_signalr(self) -> None:
         """Start the SignalR connection for real-time updates."""
@@ -76,6 +80,7 @@ class ResideoDataUpdateCoordinator(DataUpdateCoordinator[dict[str, DeviceState]]
             if self._last_update_success is False:
                 _LOGGER.info("Connection to Resideo API restored")
             self._last_update_success = True
+            self._check_repairs(data)
             return data
         except ResideoAuthError as err:
             self._last_update_success = False
@@ -85,3 +90,16 @@ class ResideoDataUpdateCoordinator(DataUpdateCoordinator[dict[str, DeviceState]]
                 _LOGGER.warning("Unable to connect to Resideo API: %s", err)
             self._last_update_success = False
             raise UpdateFailed(f"Error communicating with Resideo API: {err}") from err
+
+    def _check_repairs(self, data: dict[str, DeviceState]) -> None:
+        """Run repair checks for all devices."""
+        for device_id, state in data.items():
+            offline_count = self._consecutive_offline.get(device_id, 0)
+            fault_counts = self._consecutive_faults.get(device_id, {})
+
+            offline_count, fault_counts = check_device_repairs(
+                self.hass, device_id, state, offline_count, fault_counts
+            )
+
+            self._consecutive_offline[device_id] = offline_count
+            self._consecutive_faults[device_id] = fault_counts
