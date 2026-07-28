@@ -52,6 +52,9 @@ class DeviceState:
     # changed, keyed the same as the alarmState sub-objects above.
     alarm_timestamps: dict[str, int | None]
 
+    # eventSource for each alarm key ("self", "node", "remote")
+    alarm_event_sources: dict[str, str | None]
+
     # Device config
     early_warning: bool | None
     language: str | None
@@ -335,6 +338,9 @@ class ResideoApiClient:
             eol_state=alarm_state.get("eol", {}).get("deviceState", "unknown"),
             alarm_timestamps={
                 key: alarm_state.get(key, {}).get("tStampEpoch") for key in alarm_keys
+            },
+            alarm_event_sources={
+                key: alarm_state.get(key, {}).get("eventSource") for key in alarm_keys
             },
             # Device config
             early_warning=device_config.get("earlyWarning"),
