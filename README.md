@@ -7,7 +7,6 @@ A HACS custom integration for First Alert Safe & Sound smoke/CO detectors, rever
 - **Full alarm state detection** — recognizes all alarm variants from the official app, including early warning, interconnect, and direct alarm states for both smoke and CO
 - **Real-time push notifications** — maintains a SignalR WebSocket connection to the Resideo notification service, triggering an immediate refresh when device state changes
 - **Event entities** — fires typed Home Assistant events on state changes (smoke alarm, CO alarm, battery low, AC power loss, etc.) for use in automations
-- **Identify button** — chirps/flashes a detector to help locate it physically
 - **Repairs integration** — raises persistent repair issues for devices that are offline, faulted, or at end-of-life
 - **Power & battery normalization** — handles transitional power states (`acToDc`, `acLoss`, `acRestored`, etc.) and extended battery states (`replace`, `critical`)
 
@@ -91,12 +90,6 @@ Each device has an **Alarm Events** event entity that fires typed HA events on s
 | `test` | Self-test initiated |
 
 Events include `state` and `event_source` data attributes. Events only fire on state *changes* — the initial load on startup does not trigger events.
-
-### Button
-
-| Entity | Description |
-|--------|-------------|
-| Identify | Chirps/flashes the detector to help locate it physically |
 
 ### Repairs
 

@@ -107,11 +107,6 @@
     }
   },
   "entity": {
-    "button": {
-      "identify": {
-        "name": "Identify"
-      }
-    },
     "binary_sensor": {
       "smoke": {
         "name": "Smoke Alarm"

@@ -308,18 +308,6 @@ Each alarm state object includes an `eventSource` field indicating the origin of
 
 ---
 
-## Identify Endpoint
-
-Chirps/flashes the detector LED to help locate it physically.
-
-```http
-POST /ris-public-api/api/v2/devices/smokeDetectors/{deviceId}/identify
-```
-
-No request body required. Returns `200 OK` on success.
-
----
-
 ## Activity Feed
 
 Retrieves the event/activity history for the account.
@@ -378,8 +366,9 @@ The official app uses Bluetooth Low Energy via the OpenWeave protocol for certai
 |---------|--------|
 | Self-test | `dev.flutter.pigeon.openweave.OpenWeaveHost.systemTest` |
 | Hush/Silence | `dev.flutter.pigeon.openweave.OpenWeaveHost.hush` |
+| Identify (chirp/flash) | Likely BLE-only — cloud endpoint returns 404 for all path variations tested |
 
-These require a direct BLE connection to the device and authentication using the `networkKey` from the device shadow's `CitadelSharedConfig`. The cloud API has no equivalent endpoint for triggering tests or silencing alarms remotely.
+These require a direct BLE connection to the device and authentication using the `networkKey` from the device shadow's `CitadelSharedConfig`. The cloud API has no equivalent endpoint for triggering tests, silencing alarms, or identifying devices remotely.
 
 ---
 
@@ -406,8 +395,7 @@ GET /ris-public-api/api/v1/geofence
 1. **Binary Sensors:** Smoke Alarm, CO Alarm, Malfunction, Connectivity, Battery Low, Test Mode, Silenced, End of Life, Early Warning, plus fault flags (General, E2, Photo, Drift, CO, Temperature, Voice, Radio)
 2. **Sensors:** Battery Status, Power Source, Smoke Status, CO Status, Test Status, Silence Status, EOL Status, Language, Last Seen, WiFi, firmware/hardware versions, running hours, registration info
 3. **Event Entity:** Alarm Events (fires typed events on state changes)
-4. **Button:** Identify (chirps/flashes device)
-5. **Repairs:** Offline, EOL, and fault conditions
+4. **Repairs:** Offline, EOL, and fault conditions
 
 ### Real-Time Updates
 
