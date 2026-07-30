@@ -30,7 +30,10 @@ def check_device_repairs(
     Returns updated (consecutive_offline, consecutive_faults) counters.
     """
     # --- Offline ---
-    if not state.is_online:
+    # Battery-powered devices (power_state dc or battery) sleep to conserve
+    # energy, so being offline is expected — skip the offline repair for them.
+    is_battery_powered = state.power_state in ("dc", "battery")
+    if not state.is_online and not is_battery_powered:
         consecutive_offline += 1
         if consecutive_offline >= THRESHOLD_OFFLINE:
             ir.async_create_issue(
