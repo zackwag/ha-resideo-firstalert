@@ -134,6 +134,16 @@ class ResideoApiClient:
         self._devices_cache: list[dict[str, Any]] | None = None
         self._devices_cache_time: datetime | None = None
 
+    @property
+    def refresh_token(self) -> str:
+        """Return the current refresh token.
+
+        Not necessarily the value the client was constructed with:
+        Resideo rotates refresh tokens, so any API call may have
+        replaced it. Read it back from here before persisting.
+        """
+        return self._refresh_token
+
     async def _ensure_token(self) -> str:
         """Ensure we have a valid access token."""
         async with self._lock:

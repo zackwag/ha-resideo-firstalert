@@ -94,9 +94,9 @@ class ResideoConfigFlow(ConfigFlow, domain=DOMAIN):
                     return self.async_create_entry(
                         title=title,
                         data={
-                            CONF_REFRESH_TOKEN: refresh_token,
+                            CONF_REFRESH_TOKEN: client.refresh_token,
                             CONF_TOKEN: {
-                                "refresh_token": refresh_token,
+                                "refresh_token": client.refresh_token,
                             },
                         },
                     )
@@ -155,9 +155,9 @@ class ResideoConfigFlow(ConfigFlow, domain=DOMAIN):
                 return self.async_create_entry(
                     title=title,
                     data={
-                        CONF_REFRESH_TOKEN: refresh_token,
+                        CONF_REFRESH_TOKEN: client.refresh_token,
                         CONF_TOKEN: {
-                            "refresh_token": refresh_token,
+                            "refresh_token": client.refresh_token,
                         },
                     },
                 )
@@ -236,8 +236,8 @@ class ResideoConfigFlow(ConfigFlow, domain=DOMAIN):
                     return self.async_update_reload_and_abort(
                         self._get_reauth_entry(),
                         data_updates={
-                            CONF_REFRESH_TOKEN: refresh_token,
-                            CONF_TOKEN: {"refresh_token": refresh_token},
+                            CONF_REFRESH_TOKEN: client.refresh_token,
+                            CONF_TOKEN: {"refresh_token": client.refresh_token},
                         },
                     )
 
@@ -287,8 +287,8 @@ class ResideoConfigFlow(ConfigFlow, domain=DOMAIN):
                 return self.async_update_reload_and_abort(
                     self._get_reauth_entry(),
                     data_updates={
-                        CONF_REFRESH_TOKEN: refresh_token,
-                        CONF_TOKEN: {"refresh_token": refresh_token},
+                        CONF_REFRESH_TOKEN: client.refresh_token,
+                        CONF_TOKEN: {"refresh_token": client.refresh_token},
                     },
                 )
 
@@ -373,10 +373,10 @@ class ResideoOptionsFlowHandler(OptionsFlow):
                     # Update the config entry data with new token
                     new_data = {
                         **self.config_entry.data,
-                        CONF_REFRESH_TOKEN: refresh_token,
+                        CONF_REFRESH_TOKEN: client.refresh_token,
                     }
                     if CONF_TOKEN in self.config_entry.data:
-                        new_data[CONF_TOKEN] = {"refresh_token": refresh_token}
+                        new_data[CONF_TOKEN] = {"refresh_token": client.refresh_token}
 
                     self.hass.config_entries.async_update_entry(
                         self.config_entry,
