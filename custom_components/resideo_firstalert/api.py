@@ -159,7 +159,7 @@ class ResideoApiClient:
                 },
                 headers={"Content-Type": "application/json"},
             ) as response:
-                if response.status == 401:
+                if response.status in (401, 403):
                     raise ResideoAuthError("Invalid refresh token")
                 if response.status != 200:
                     raise ResideoApiError(
