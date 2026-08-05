@@ -163,7 +163,7 @@ class ResideoConfigFlow(ConfigFlow, domain=DOMAIN):
                 )
 
             except ResideoAuthError:
-                errors["base"] = "invalid_auth"
+                errors["base"] = "invalid_token"
             except ResideoConnectionError:
                 errors["base"] = "cannot_connect"
             except Exception:
@@ -293,7 +293,7 @@ class ResideoConfigFlow(ConfigFlow, domain=DOMAIN):
                 )
 
             except ResideoAuthError:
-                errors["base"] = "invalid_auth"
+                errors["base"] = "invalid_token"
             except ResideoConnectionError:
                 errors["base"] = "cannot_connect"
             except Exception:
@@ -394,7 +394,7 @@ class ResideoOptionsFlowHandler(OptionsFlow):
                     )
 
             except ResideoAuthError:
-                errors["base"] = "invalid_auth"
+                errors["base"] = "invalid_token"
             except ResideoConnectionError:
                 errors["base"] = "cannot_connect"
             except Exception:
