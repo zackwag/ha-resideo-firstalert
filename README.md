@@ -127,15 +127,46 @@ Copy `custom_components/resideo_firstalert/` into your HA `config/custom_compone
 
 ## Setup
 
-1. Go to **Settings → Devices & Services → Add Integration → First Alert by Resideo**
-2. Choose **Login with email and password** (recommended) and enter your Resideo account credentials — the same ones used in the First Alert app
-3. Your devices are discovered automatically
+> [!IMPORTANT]
+> **Email/password login no longer works.** Resideo has enabled a captcha on
+> its Auth0 login endpoint, which rejects the request before your credentials
+> are ever checked — so a correct password fails exactly like a wrong one:
+>
+> ```
+> POST https://login.resideo.com/usernamepassword/login
+> HTTP 401  {"name":"invalid_captcha","description":"Invalid captcha value"}
+> ```
+>
+> This cannot be fixed inside the integration; the captcha exists specifically
+> to block non-browser clients. Use **Enter refresh token manually** instead.
 
-If you'd rather not enter your account password, choose **Enter refresh token manually** instead and see [Manual Token Entry](#manual-token-entry) below.
+1. Go to **Settings → Devices & Services → Add Integration → First Alert by Resideo**
+2. Choose **Enter refresh token manually** and supply a token — see
+   [Manual Token Entry](#manual-token-entry) below
+3. Your devices are discovered automatically
 
 ## Manual Token Entry
 
-If you prefer not to use email/password login, you can supply a refresh token directly:
+Since email/password login is captcha-blocked, this is the supported way to
+authenticate. There are two ways to obtain a token.
+
+### Option A — browser login (no proxy needed)
+
+The captcha only blocks *scripted* logins; a real browser can complete it.
+
+1. Build an Auth0 authorize URL for the app client, with PKCE (`code_challenge`,
+   `code_challenge_method=S256`) and `redirect_uri`
+   `com.resideo.firstalert://login.resideo.com/ios/com.resideo.firstalert/callback`
+2. Open it in a desktop browser, log in, and solve the captcha
+3. The browser will fail to follow the `com.resideo.firstalert://` redirect —
+   that is the success case. Copy the whole failed URL and take its `code`
+   parameter (it is also recorded in browser history)
+4. Exchange the code at `POST https://login.resideo.com/oauth/token` with
+   `grant_type=authorization_code` and your `code_verifier`
+
+Authorization codes expire within about 30 seconds, so do steps 3-4 promptly.
+
+### Option B — capture from the app
 
 1. Install a network proxy such as [Proxyman](https://proxyman.io/) (macOS/iOS) or [mitmproxy](https://mitmproxy.org/)
 2. Configure SSL interception for `login.resideo.com`
