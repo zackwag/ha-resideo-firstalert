@@ -127,21 +127,36 @@ Copy `custom_components/resideo_firstalert/` into your HA `config/custom_compone
 
 ## Setup
 
+> [!IMPORTANT]
+> **Email/password login no longer works.** Resideo has enabled a captcha on
+> its Auth0 login endpoint that blocks non-browser clients. Use manual token
+> entry instead.
+
 1. Go to **Settings → Devices & Services → Add Integration → First Alert by Resideo**
-2. Choose **Login with email and password** (recommended) and enter your Resideo account credentials — the same ones used in the First Alert app
+2. Enter your refresh token — see [Getting Your Token](#getting-your-token) below
 3. Your devices are discovered automatically
 
-If you'd rather not enter your account password, choose **Enter refresh token manually** instead and see [Manual Token Entry](#manual-token-entry) below.
+## Getting Your Token
 
-## Manual Token Entry
+There are two ways to obtain a refresh token.
 
-If you prefer not to use email/password login, you can supply a refresh token directly:
+### Option A — Browser login (no proxy needed)
+
+The captcha only blocks scripted logins; a real browser can complete it.
+
+1. Build an Auth0 authorize URL with PKCE (`code_challenge`, `code_challenge_method=S256`), `client_id` of `SRmiA7CaYi1JgivDZdzzoZu4X5VBogGt`, and `redirect_uri` of `com.resideo.firstalert://login.resideo.com/ios/com.resideo.firstalert/callback`
+2. Open it in a desktop browser, log in, and solve the captcha
+3. The browser will fail to follow the `com.resideo.firstalert://` redirect — that is the success case. Copy the whole failed URL and extract the `code` parameter
+4. Exchange the code at `POST https://login.resideo.com/oauth/token` with `grant_type=authorization_code` and your `code_verifier`
+
+Authorization codes expire within about 30 seconds, so do steps 3–4 promptly.
+
+### Option B — Capture from the app
 
 1. Install a network proxy such as [Proxyman](https://proxyman.io/) (macOS/iOS) or [mitmproxy](https://mitmproxy.org/)
 2. Configure SSL interception for `login.resideo.com`
 3. Log into the First Alert app on your phone while capturing traffic
 4. Find the request to `POST https://login.resideo.com/oauth/token` and copy the `refresh_token` field from the response:
-
    ```json
    {
      "access_token": "...",
@@ -150,8 +165,7 @@ If you prefer not to use email/password login, you can supply a refresh token di
      "token_type": "Bearer"
    }
    ```
-
-5. In Home Assistant, select **Enter refresh token manually** and paste the token
+5. In Home Assistant, paste the token
 
 ## Options
 
