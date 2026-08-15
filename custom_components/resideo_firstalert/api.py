@@ -132,6 +132,11 @@ class ResideoApiClient:
         self._lock = asyncio.Lock()
         self._on_refresh_token_updated = on_refresh_token_updated
         self._devices_cache: list[dict[str, Any]] | None = None
+
+    @property
+    def refresh_token(self) -> str:
+        """Return the current refresh token (may have been rotated)."""
+        return self._refresh_token
         self._devices_cache_time: datetime | None = None
 
     async def _ensure_token(self) -> str:
@@ -159,7 +164,7 @@ class ResideoApiClient:
                 },
                 headers={"Content-Type": "application/json"},
             ) as response:
-                if response.status == 401:
+                if response.status in (401, 403):
                     raise ResideoAuthError("Invalid refresh token")
                 if response.status != 200:
                     raise ResideoApiError(

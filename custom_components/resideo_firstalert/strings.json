@@ -94,6 +94,7 @@
     },
     "error": {
       "invalid_auth": "Invalid email or password",
+      "invalid_token": "This refresh token was rejected. It may have expired or been rotated — obtain a new one and try again.",
       "cannot_connect": "Unable to connect to Resideo API",
       "unknown": "An unknown error occurred",
       "auth_error": "Authentication failed - please try again",

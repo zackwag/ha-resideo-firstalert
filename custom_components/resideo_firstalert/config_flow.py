@@ -46,14 +46,8 @@ class ResideoConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        """Handle user-initiated flow - offer choice of auth methods."""
-        return self.async_show_menu(
-            step_id="user",
-            menu_options=["login", "manual"],
-            description_placeholders={
-                "docs_url": "https://github.com/zackwag/ha-resideo-firstalert#authentication"
-            },
-        )
+        """Handle user-initiated flow - go directly to manual token entry."""
+        return await self.async_step_manual(user_input)
 
     async def async_step_login(
         self, user_input: dict[str, Any] | None = None
@@ -91,12 +85,13 @@ class ResideoConfigFlow(ConfigFlow, domain=DOMAIN):
                     if first_name:
                         title = f"First Alert ({first_name} {last_name})"
 
+                    current_token = client.refresh_token
                     return self.async_create_entry(
                         title=title,
                         data={
-                            CONF_REFRESH_TOKEN: refresh_token,
+                            CONF_REFRESH_TOKEN: current_token,
                             CONF_TOKEN: {
-                                "refresh_token": refresh_token,
+                                "refresh_token": current_token,
                             },
                         },
                     )
@@ -152,18 +147,19 @@ class ResideoConfigFlow(ConfigFlow, domain=DOMAIN):
                 if first_name:
                     title = f"First Alert ({first_name} {last_name})"
 
+                current_token = client.refresh_token
                 return self.async_create_entry(
                     title=title,
                     data={
-                        CONF_REFRESH_TOKEN: refresh_token,
+                        CONF_REFRESH_TOKEN: current_token,
                         CONF_TOKEN: {
-                            "refresh_token": refresh_token,
+                            "refresh_token": current_token,
                         },
                     },
                 )
 
             except ResideoAuthError:
-                errors["base"] = "invalid_auth"
+                errors["base"] = "invalid_token"
             except ResideoConnectionError:
                 errors["base"] = "cannot_connect"
             except Exception:
@@ -198,11 +194,8 @@ class ResideoConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_reauth_confirm(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        """Handle reauth confirmation - offer choice."""
-        return self.async_show_menu(
-            step_id="reauth_confirm",
-            menu_options=["reauth_login", "reauth_manual"],
-        )
+        """Handle reauth — go directly to manual token entry."""
+        return await self.async_step_reauth_manual(user_input)
 
     async def async_step_reauth_login(
         self, user_input: dict[str, Any] | None = None
@@ -233,11 +226,12 @@ class ResideoConfigFlow(ConfigFlow, domain=DOMAIN):
                     ):
                         return mismatch
 
+                    current_token = client.refresh_token
                     return self.async_update_reload_and_abort(
                         self._get_reauth_entry(),
                         data_updates={
-                            CONF_REFRESH_TOKEN: refresh_token,
-                            CONF_TOKEN: {"refresh_token": refresh_token},
+                            CONF_REFRESH_TOKEN: current_token,
+                            CONF_TOKEN: {"refresh_token": current_token},
                         },
                     )
 
@@ -284,16 +278,17 @@ class ResideoConfigFlow(ConfigFlow, domain=DOMAIN):
                 ):
                     return mismatch
 
+                current_token = client.refresh_token
                 return self.async_update_reload_and_abort(
                     self._get_reauth_entry(),
                     data_updates={
-                        CONF_REFRESH_TOKEN: refresh_token,
-                        CONF_TOKEN: {"refresh_token": refresh_token},
+                        CONF_REFRESH_TOKEN: current_token,
+                        CONF_TOKEN: {"refresh_token": current_token},
                     },
                 )
 
             except ResideoAuthError:
-                errors["base"] = "invalid_auth"
+                errors["base"] = "invalid_token"
             except ResideoConnectionError:
                 errors["base"] = "cannot_connect"
             except Exception:
@@ -370,21 +365,18 @@ class ResideoOptionsFlowHandler(OptionsFlow):
                 ):
                     errors["base"] = "account_mismatch"
                 else:
-                    # Update the config entry data with new token
+                    current_token = client.refresh_token
                     new_data = {
                         **self.config_entry.data,
-                        CONF_REFRESH_TOKEN: refresh_token,
+                        CONF_REFRESH_TOKEN: current_token,
                     }
                     if CONF_TOKEN in self.config_entry.data:
-                        new_data[CONF_TOKEN] = {"refresh_token": refresh_token}
+                        new_data[CONF_TOKEN] = {"refresh_token": current_token}
 
                     self.hass.config_entries.async_update_entry(
                         self.config_entry,
                         data=new_data,
                     )
-                    # Reload so the running API client picks up the new
-                    # token immediately, instead of continuing to use the
-                    # stale one until the next manual reload or restart.
                     await self.hass.config_entries.async_reload(
                         self.config_entry.entry_id
                     )
@@ -394,7 +386,7 @@ class ResideoOptionsFlowHandler(OptionsFlow):
                     )
 
             except ResideoAuthError:
-                errors["base"] = "invalid_auth"
+                errors["base"] = "invalid_token"
             except ResideoConnectionError:
                 errors["base"] = "cannot_connect"
             except Exception:
