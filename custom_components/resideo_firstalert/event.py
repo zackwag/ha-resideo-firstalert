@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from homeassistant.components.event import EventDeviceClass, EventEntity
+from homeassistant.components.event import EventEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -48,7 +48,6 @@ async def async_setup_entry(
 class ResideoAlarmEvent(ResideoEntity, EventEntity):
     """Event entity that fires when alarm state changes are detected."""
 
-    _attr_device_class = EventDeviceClass.DOORBELL  # closest built-in class
     _attr_event_types = ALARM_EVENT_TYPES
     _attr_translation_key = "alarm_event"
 
