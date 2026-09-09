@@ -3,6 +3,8 @@
 
 Usage:
     python scripts/list_devices.py <refresh_token>
+
+Requires: pip install pyresideo-firstalert
 """
 
 import asyncio
@@ -10,10 +12,7 @@ import sys
 
 import aiohttp
 
-OAUTH_CLIENT_ID = "SRmiA7CaYi1JgivDZdzzoZu4X5VBogGt"
-OAUTH_TOKEN_URL = "https://login.resideo.com/oauth/token"
-API_BASE_URL = "https://api.resideo.com"
-API_ACCOUNTS_ENDPOINT = "/ris-public-api/api/v1/accounts"
+from resideo_firstalert_api import ResideoApiClient
 
 
 async def main():
@@ -24,55 +23,28 @@ async def main():
     refresh_token = sys.argv[1]
 
     async with aiohttp.ClientSession() as session:
-        print("Authenticating...")
-        async with session.post(
-            OAUTH_TOKEN_URL,
-            json={
-                "grant_type": "refresh_token",
-                "refresh_token": refresh_token,
-                "client_id": OAUTH_CLIENT_ID,
-            },
-        ) as resp:
-            if resp.status != 200:
-                text = await resp.text()
-                print(f"FATAL: Token refresh failed ({resp.status}): {text}")
-                sys.exit(1)
-            data = await resp.json()
-            token = data["access_token"]
-            new_rt = data.get("refresh_token")
-            if new_rt and new_rt != refresh_token:
-                print(f"NOTE: Refresh token rotated. New token:\n{new_rt}\n")
+        client = ResideoApiClient(session, refresh_token)
 
         print("Fetching devices...\n")
-        headers = {"Authorization": f"Bearer {token}", "Accept": "application/json"}
-        async with session.get(
-            f"{API_BASE_URL}{API_ACCOUNTS_ENDPOINT}", headers=headers
-        ) as resp:
-            if resp.status != 200:
-                text = await resp.text()
-                print(f"FATAL: Accounts request failed ({resp.status}): {text}")
-                sys.exit(1)
-            account_data = await resp.json()
+        devices = await client.get_devices()
+
+        if client.refresh_token != refresh_token:
+            print(f"NOTE: Refresh token rotated. New token:\n{client.refresh_token}\n")
 
         print(f"{'#':<4} {'Name':<30} {'Hardware ID':<20} {'Consumer Device ID'}")
         print("-" * 100)
 
-        idx = 0
-        for consumer_user in account_data.get("data", {}).get("consumerUsers", []):
-            for location in consumer_user.get("consumerAccount", {}).get("locations", []):
-                location_name = location.get("name", "Unknown")
-                for consumer_device in location.get("consumerDevices", []):
-                    device = consumer_device.get("device", {})
-                    idx += 1
-                    name = consumer_device.get("name", "Unnamed")
-                    hw_id = device.get("deviceId", "?")
-                    consumer_id = consumer_device.get("id", "?")
-                    device_type = device.get("globalDeviceType", "?")
-                    print(f"{idx:<4} {name:<30} {hw_id:<20} {consumer_id}")
-                    print(f"     Location: {location_name}  |  Type: {device_type}")
-                    print()
+        for idx, device in enumerate(devices, 1):
+            name = device.get("name", "Unnamed")
+            hw_id = device.get("device_id", "?")
+            consumer_id = device.get("consumer_device_id", "?")
+            location = device.get("location", "Unknown")
+            device_type = device.get("device_type", "?")
+            print(f"{idx:<4} {name:<30} {hw_id:<20} {consumer_id}")
+            print(f"     Location: {location}  |  Type: {device_type}")
+            print()
 
-        if idx == 0:
+        if not devices:
             print("No devices found.")
 
 

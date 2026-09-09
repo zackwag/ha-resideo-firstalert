@@ -6,7 +6,7 @@ import base64
 import hashlib
 from unittest.mock import Mock
 
-from resideo_firstalert.auth import ResideoAuth
+from resideo_firstalert_api.auth import ResideoAuth
 
 
 def test_generate_pkce_verifier_is_valid_length_and_charset() -> None:

@@ -7,12 +7,12 @@ from datetime import datetime, timedelta
 import aiohttp
 import pytest
 from aioresponses import aioresponses
-from resideo_firstalert.api import (
+from resideo_firstalert_api.api import (
     ResideoApiClient,
     ResideoAuthError,
     ResideoConnectionError,
 )
-from resideo_firstalert.const import (
+from resideo_firstalert_api.const import (
     ALARM_STATE_ALARM,
     API_ACCOUNTS_ENDPOINT,
     API_BASE_URL,
