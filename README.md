@@ -178,6 +178,7 @@ After setup, click **Configure** on the integration card to change:
 
 ## Requirements
 
+- [`pyresideo-firstalert`](https://pypi.org/project/pyresideo-firstalert/) `== 1.0.0` (installed automatically) — async API client for the Resideo First Alert cloud API.
 - [`python-dateutil`](https://pypi.org/project/python-dateutil/) `>= 2.8.2` (installed automatically) — used to parse device timestamps.
 - Home Assistant 2024.1.0 or newer
 
@@ -365,11 +366,11 @@ docker compose down
 
 ### Running Tests
 
-The test suite covers `api.py` and `auth.py` (the parts of the integration with no Home Assistant dependency) with mocked HTTP calls:
+The test suite covers the API client and auth flow with mocked HTTP calls:
 
 ```bash
 pip install -r requirements-test.txt
-PYTHONPATH=custom_components python -m pytest tests/ -v
+python -m pytest tests/ -v
 ```
 
 ## Privacy Note
