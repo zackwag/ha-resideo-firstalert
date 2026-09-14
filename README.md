@@ -1,5 +1,10 @@
 # First Alert by Resideo — Home Assistant HACS Integration
 
+> [!WARNING]
+> **This project is no longer actively maintained.** I've replaced the First Alert smart alarms in my own home with non-smart ones after repeated false alarms — including one that broke a night's sleep — and combined with ongoing instability in Resideo's cloud API (see [#26](https://github.com/zackwag/ha-resideo-firstalert/issues/26)), I'm no longer able to support this integration.
+>
+> I won't be actively fixing bugs or triaging new issues, but the repo stays open. PRs from the community are welcome and I'll review them on a best-effort basis — feel free to fork if you want to take it further.
+
 A HACS custom integration for First Alert Safe & Sound smoke/CO detectors, reverse-engineered from the First Alert app's Resideo/Auth0 OAuth flow and REST API. Combines cloud polling with real-time SignalR push notifications for near-instant alarm detection.
 
 ## Features
