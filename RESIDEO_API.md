@@ -45,13 +45,20 @@ Content-Type: application/json
 
 ## API Endpoints
 
-Base URL: `https://api.resideo.com`
+Base URL: `https://api.ha.resideo.com`
+
+Resideo retired the previous host, `api.resideo.com`, in September 2026 with no
+announcement; it now returns a permanent 503 "planned maintenance" body on
+every call. Paths are unchanged on the new host, but two extra headers are now
+mandatory on every request, not just writes:
 
 All requests require:
 ```http
 Authorization: Bearer <access_token>
 Content-Type: application/json
 Accept: application/json
+Ocp-Apim-Subscription-Key: <azure apim key>
+User-Agent: <non-default app user-agent>
 ```
 
 ### Get Account Information
@@ -313,7 +320,7 @@ Each alarm state object includes an `eventSource` field indicating the origin of
 Retrieves the event/activity history for the account.
 
 ```http
-POST https://api.resideo.com/ds-activity-feed-api/api/v1/app/events
+POST https://api.ha.resideo.com/ds-activity-feed-api/api/v1/app/events
 Content-Type: application/json
 
 {
@@ -447,14 +454,14 @@ class ResideoClient:
 
     def get_accounts(self):
         resp = requests.get(
-            "https://api.resideo.com/ris-public-api/api/v1/accounts",
+            "https://api.ha.resideo.com/ris-public-api/api/v1/accounts",
             headers=self._headers()
         )
         return resp.json()
 
     def get_device_state(self, device_id: str):
         resp = requests.get(
-            f"https://api.resideo.com/ris-public-api/api/v2/devices/smokeDetectors/{device_id}/state",
+            f"https://api.ha.resideo.com/ris-public-api/api/v2/devices/smokeDetectors/{device_id}/state",
             headers=self._headers()
         )
         return resp.json()
