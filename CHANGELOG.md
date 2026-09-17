@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.0](https://github.com/zackwag/ha-resideo-firstalert/compare/v2.2.1...v2.3.0) (2026-09-17)
+
+
+### Features
+
+* **ci:** add ruff lint + format check ([#41](https://github.com/zackwag/ha-resideo-firstalert/issues/41)) ([5e0ca0d](https://github.com/zackwag/ha-resideo-firstalert/commit/5e0ca0d4cbf0f717dc80fc5227e379c431930747))
+
 ## [2.2.1](https://github.com/zackwag/ha-resideo-firstalert/compare/v2.2.0...v2.2.1) (2026-09-17)
 
 
