@@ -46,16 +46,15 @@
         "title": "Connect to First Alert by Resideo",
         "description": "Choose how you want to authenticate with your Resideo account.\n\nSee the [documentation]({docs_url}) for more information.",
         "menu_options": {
-          "login": "Login with email and password (Recommended)",
+          "browser": "Sign in with your browser (Recommended)",
           "manual": "Enter refresh token manually"
         }
       },
-      "login": {
-        "title": "Login to Resideo",
-        "description": "Enter your Resideo account credentials. These are the same credentials you use in the First Alert app.",
+      "browser": {
+        "title": "Sign in with your browser",
+        "description": "Resideo protects the login form with a bot check, so signing in directly from Home Assistant doesn't work. Sign in with your own browser instead.\n\n1. [Open the Resideo sign-in page in a new tab]({authorize_url}) and sign in with your Resideo account.\n2. After you sign in the browser lands on a page that just says \"Not found.\". That's expected — the part we need is in the address bar.\n3. Copy the whole address from the address bar (it contains `?code=...`) and paste it below, or just the `code` value if you prefer.\n\nThe code is single-use and expires quickly, so paste it right after signing in.",
         "data": {
-          "email": "Email",
-          "password": "Password"
+          "callback": "Address bar URL or code"
         }
       },
       "manual": {
@@ -72,16 +71,15 @@
         "title": "Reauthenticate",
         "description": "Your authentication has expired. Please choose how to reauthenticate.",
         "menu_options": {
-          "reauth_login": "Login with email and password",
+          "reauth_browser": "Sign in with your browser (Recommended)",
           "reauth_manual": "Enter refresh token manually"
         }
       },
-      "reauth_login": {
-        "title": "Reauthenticate with Resideo",
-        "description": "Enter your Resideo account credentials to restore your connection.",
+      "reauth_browser": {
+        "title": "Reauthenticate with your browser",
+        "description": "1. [Open the Resideo sign-in page in a new tab]({authorize_url}) and sign in with your Resideo account.\n2. After you sign in the browser lands on a page that just says \"Not found.\". That's expected — the part we need is in the address bar.\n3. Copy the whole address from the address bar (it contains `?code=...`) and paste it below, or just the `code` value.\n\nThe code is single-use and expires quickly, so paste it right after signing in.",
         "data": {
-          "email": "Email",
-          "password": "Password"
+          "callback": "Address bar URL or code"
         }
       },
       "reauth_manual": {
@@ -93,11 +91,11 @@
       }
     },
     "error": {
-      "invalid_auth": "Invalid email or password",
+      "invalid_auth": "Resideo rejected this login",
       "invalid_token": "This refresh token was rejected. It may have expired or been rotated — obtain a new one and try again.",
       "cannot_connect": "Unable to connect to Resideo API",
       "unknown": "An unknown error occurred",
-      "auth_error": "Authentication failed - please try again",
+      "auth_error": "The authorization code was rejected. It may have expired or already been used — restart the sign-in and paste a fresh code.",
       "no_refresh_token": "Login succeeded but no refresh token was returned",
       "account_mismatch": "This refresh token belongs to a different Resideo account than the one currently configured"
     },
