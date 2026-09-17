@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.3.0](https://github.com/zackwag/ha-resideo-firstalert/compare/v2.2.1...v2.3.0) (2026-09-17)
+
+
+### Features
+
+* **ci:** add ruff lint + format check ([#41](https://github.com/zackwag/ha-resideo-firstalert/issues/41)) ([5e0ca0d](https://github.com/zackwag/ha-resideo-firstalert/commit/5e0ca0d4cbf0f717dc80fc5227e379c431930747))
+
+
+### Bug Fixes
+
+* **config_flow:** don't swallow already_configured abort ([#43](https://github.com/zackwag/ha-resideo-firstalert/issues/43)) ([b74b245](https://github.com/zackwag/ha-resideo-firstalert/commit/b74b245da2fdbf449b3a419830309a2926cb19e7))
+
 ## [2.2.1](https://github.com/zackwag/ha-resideo-firstalert/compare/v2.2.0...v2.2.1) (2026-09-17)
 
 
