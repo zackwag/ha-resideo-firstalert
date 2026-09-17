@@ -94,7 +94,10 @@ class ResideoAlarmEvent(ResideoEntity, EventEntity):
             if event_type:
                 self._trigger_event(
                     event_type,
-                    {"state": device_state.smoke_state, "event_source": device_state.alarm_event_sources.get("smoke")},
+                    {
+                        "state": device_state.smoke_state,
+                        "event_source": device_state.alarm_event_sources.get("smoke"),
+                    },
                 )
             self._prev_smoke = device_state.smoke_state
 
@@ -104,7 +107,10 @@ class ResideoAlarmEvent(ResideoEntity, EventEntity):
             if event_type:
                 self._trigger_event(
                     event_type,
-                    {"state": device_state.co_state, "event_source": device_state.alarm_event_sources.get("co")},
+                    {
+                        "state": device_state.co_state,
+                        "event_source": device_state.alarm_event_sources.get("co"),
+                    },
                 )
             self._prev_co = device_state.co_state
 
@@ -120,9 +126,13 @@ class ResideoAlarmEvent(ResideoEntity, EventEntity):
         if device_state.power_state != self._prev_power:
             if device_state.power_state in ("dc", "acToDc", "acLoss"):
                 self._trigger_event("power_ac_loss", {"state": device_state.power_state})
-            elif device_state.power_state in ("ac", "dcToAc", "acRestored", "acOnly"):
-                if self._prev_power in ("dc", "acToDc", "acLoss"):
-                    self._trigger_event("power_ac_restored", {"state": device_state.power_state})
+            elif device_state.power_state in (
+                "ac",
+                "dcToAc",
+                "acRestored",
+                "acOnly",
+            ) and self._prev_power in ("dc", "acToDc", "acLoss"):
+                self._trigger_event("power_ac_restored", {"state": device_state.power_state})
             self._prev_power = device_state.power_state
 
         # Detect malfunction changes

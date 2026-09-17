@@ -11,7 +11,6 @@ import asyncio
 import sys
 
 import aiohttp
-
 from resideo_firstalert_api import ResideoApiClient
 
 

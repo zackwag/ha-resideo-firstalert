@@ -159,7 +159,8 @@ async def test_refresh_access_token_sets_access_token_and_expiry(session) -> Non
 
     assert client._access_token == "access-1"
     assert client._token_expiry is not None
-    assert client._token_expiry > datetime.now() + timedelta(minutes=59)
+
+    assert client._token_expiry > datetime.now() + timedelta(minutes=59)  # noqa: DTZ005
 
 
 async def test_refresh_access_token_rotates_and_calls_callback(session) -> None:
@@ -257,8 +258,9 @@ async def test_get_devices_refetches_after_cache_expires(session) -> None:
         )
         first = await client.get_devices()
 
-        # Force the cache to look expired.
-        client._devices_cache_time = datetime.now() - timedelta(hours=1)
+        # Force the cache to look expired (matches ResideoApiClient's own
+        # naive datetime.now() convention).
+        client._devices_cache_time = datetime.now() - timedelta(hours=1)  # noqa: DTZ005
 
         m.get(
             ACCOUNTS_URL,
@@ -307,9 +309,7 @@ async def test_parse_device_state_missing_field_defaults_to_safe_state(session) 
     client = ResideoApiClient(session, "refresh-token")
     device_info = {"device_id": "DEVICE1"}
 
-    state = client._parse_device_state(
-        _device_state_response(include_smoke_key=False), device_info
-    )
+    state = client._parse_device_state(_device_state_response(include_smoke_key=False), device_info)
 
     assert state.smoke_state == "unknown"
     assert state.smoke_state != ALARM_STATE_ALARM
@@ -342,9 +342,7 @@ async def test_get_all_device_states_skips_device_with_non_auth_error(
         m.post(OAUTH_TOKEN_URL, payload=_token_response())
         m.get(
             ACCOUNTS_URL,
-            payload=_accounts_response(
-                [_consumer_device("DEVICE1"), _consumer_device("DEVICE2")]
-            ),
+            payload=_accounts_response([_consumer_device("DEVICE1"), _consumer_device("DEVICE2")]),
         )
         m.get(_device_state_url("DEVICE1"), status=500, body="boom")
         m.get(_device_state_url("DEVICE2"), payload=_device_state_response(device_id="DEVICE2"))

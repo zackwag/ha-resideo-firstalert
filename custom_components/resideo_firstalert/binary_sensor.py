@@ -67,8 +67,9 @@ BINARY_SENSOR_DESCRIPTIONS: tuple[ResideoBinarySensorEntityDescription, ...] = (
         key="malfunction",
         translation_key="malfunction",
         device_class=BinarySensorDeviceClass.PROBLEM,
-        value_fn=lambda state: state.malfunction_state
-        not in (ALARM_STATE_NONE, ALARM_STATE_UNKNOWN),
+        value_fn=lambda state: (
+            state.malfunction_state not in (ALARM_STATE_NONE, ALARM_STATE_UNKNOWN)
+        ),
         alarm_key="malfunction",
     ),
     ResideoBinarySensorEntityDescription(
@@ -211,9 +212,7 @@ async def async_setup_entry(
             for description in BINARY_SENSOR_DESCRIPTIONS
         ]
 
-    async_add_entities_for_devices(
-        coordinator, entry, async_add_entities, _entities_for_device
-    )
+    async_add_entities_for_devices(coordinator, entry, async_add_entities, _entities_for_device)
 
 
 class ResideoBinarySensor(ResideoEntity, BinarySensorEntity):
