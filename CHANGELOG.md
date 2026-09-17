@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.1](https://github.com/zackwag/ha-resideo-firstalert/compare/v2.2.0...v2.2.1) (2026-09-17)
+
+
+### Bug Fixes
+
+* **ci:** use RELEASE_PLEASE_TOKEN so releases trigger downstream workflows ([#39](https://github.com/zackwag/ha-resideo-firstalert/issues/39)) ([5a384e9](https://github.com/zackwag/ha-resideo-firstalert/commit/5a384e9fa6837b359bf265322c1cd0f0c768ae70))
+
 ## [2.2.0](https://github.com/zackwag/ha-resideo-firstalert/compare/v2.1.1...v2.2.0) (2026-09-17)
 
 
