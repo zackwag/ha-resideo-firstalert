@@ -1,6 +1,16 @@
 pyresideo-firstalert==1.1.0
 pytest>=8.0.0
-pytest-asyncio>=0.24.0
 aioresponses>=0.7.6
 # aioresponses 0.7.9 doesn't yet support aiohttp's newer ClientResponse signature.
 aiohttp<3.10
+
+# Home Assistant test harness for config_flow.py, pinned to the last release
+# whose homeassistant pin still uses aiohttp<3.10 (compatible with aioresponses
+# above). Newer releases pull homeassistant>=2024.8, which bumps aiohttp past
+# what aioresponses supports. This also pins pytest/pytest-asyncio itself, so
+# they're no longer listed separately above.
+pytest-homeassistant-custom-component==0.13.148
+# 0.13.148 doesn't pin acme/josepy; resolving them unpinned picks a josepy
+# that dropped ComparableX509, which the pinned homeassistant's acme
+# dependency still needs.
+josepy<2.0

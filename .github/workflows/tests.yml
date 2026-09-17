@@ -16,7 +16,9 @@ jobs:
       - name: Set up Python
         uses: "actions/setup-python@v5"
         with:
-          python-version: "3.13"
+          # pytest-homeassistant-custom-component pins numpy==1.26.0, which
+          # has no Python 3.13 wheel.
+          python-version: "3.12"
 
       - name: Install test dependencies
         run: pip install -r requirements-test.txt

@@ -14,6 +14,7 @@ from homeassistant.config_entries import (
 )
 from homeassistant.const import CONF_TOKEN
 from homeassistant.core import callback
+from homeassistant.data_entry_flow import AbortFlow
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import (
@@ -119,6 +120,8 @@ class ResideoConfigFlow(ConfigFlow, domain=DOMAIN):
                         },
                     )
 
+            except AbortFlow:
+                raise
             except AuthenticationError as err:
                 _LOGGER.error("Browser login failed: %s", err)
                 errors["base"] = "auth_error"
@@ -178,6 +181,8 @@ class ResideoConfigFlow(ConfigFlow, domain=DOMAIN):
                     },
                 )
 
+            except AbortFlow:
+                raise
             except ResideoAuthError:
                 errors["base"] = "invalid_token"
             except ResideoConnectionError:
