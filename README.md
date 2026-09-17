@@ -375,6 +375,10 @@ pip install -r requirements-test.txt
 python -m pytest tests/ -v
 ```
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full dev workflow and how this repo relates to [pyresideo-firstalert](https://github.com/zackwag/pyresideo-firstalert), the API client it depends on. Agents/AI contributors should also read [AGENTS.md](AGENTS.md).
+
 ## Privacy Note
 
 This integration communicates with Resideo's cloud servers, so your device data passes through their infrastructure. Only the refresh token is stored locally — your email and password are not stored.
