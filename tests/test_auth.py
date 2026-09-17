@@ -23,9 +23,7 @@ def test_generate_pkce_challenge_is_s256_of_verifier() -> None:
     auth._generate_pkce()
 
     expected_digest = hashlib.sha256(auth._code_verifier.encode("ascii")).digest()
-    expected_challenge = (
-        base64.urlsafe_b64encode(expected_digest).decode("utf-8").rstrip("=")
-    )
+    expected_challenge = base64.urlsafe_b64encode(expected_digest).decode("utf-8").rstrip("=")
     assert auth._code_challenge == expected_challenge
 
 

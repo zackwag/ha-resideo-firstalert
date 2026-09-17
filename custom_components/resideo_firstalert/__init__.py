@@ -24,6 +24,7 @@ from .coordinator import ResideoDataUpdateCoordinator
 
 if TYPE_CHECKING:
     from typing import TypeAlias
+
     ResideoConfigEntry: TypeAlias = ConfigEntry[ResideoDataUpdateCoordinator]
 else:
     ResideoConfigEntry = ConfigEntry
@@ -106,8 +107,6 @@ async def async_remove_config_entry_device(
     """Allow removing a device once it's no longer reported by the account."""
     coordinator: ResideoDataUpdateCoordinator = entry.runtime_data
     device_ids = {
-        identifier[1]
-        for identifier in device_entry.identifiers
-        if identifier[0] == DOMAIN
+        identifier[1] for identifier in device_entry.identifiers if identifier[0] == DOMAIN
     }
     return not device_ids & set(coordinator.data)

@@ -83,11 +83,7 @@ def async_add_entities_for_devices(
             return
         known_device_ids.update(new_device_ids)
         async_add_entities(
-            [
-                entity
-                for device_id in new_device_ids
-                for entity in entities_for_device(device_id)
-            ]
+            [entity for device_id in new_device_ids for entity in entities_for_device(device_id)]
         )
 
     entry.async_on_unload(coordinator.async_add_listener(_add_new_devices))

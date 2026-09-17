@@ -425,6 +425,7 @@ The integration supports two auth flows:
 ```python
 import requests
 
+
 class ResideoClient:
     def __init__(self, refresh_token: str):
         self.client_id = "SRmiA7CaYi1JgivDZdzzoZu4X5VBogGt"
@@ -437,8 +438,8 @@ class ResideoClient:
             json={
                 "grant_type": "refresh_token",
                 "refresh_token": self.refresh_token,
-                "client_id": self.client_id
-            }
+                "client_id": self.client_id,
+            },
         )
         data = resp.json()
         self.access_token = data["access_token"]
@@ -447,24 +448,21 @@ class ResideoClient:
     def _headers(self):
         if not self.access_token:
             self._refresh_access_token()
-        return {
-            "Authorization": f"Bearer {self.access_token}",
-            "Content-Type": "application/json"
-        }
+        return {"Authorization": f"Bearer {self.access_token}", "Content-Type": "application/json"}
 
     def get_accounts(self):
         resp = requests.get(
-            "https://api.ha.resideo.com/ris-public-api/api/v1/accounts",
-            headers=self._headers()
+            "https://api.ha.resideo.com/ris-public-api/api/v1/accounts", headers=self._headers()
         )
         return resp.json()
 
     def get_device_state(self, device_id: str):
         resp = requests.get(
             f"https://api.ha.resideo.com/ris-public-api/api/v2/devices/smokeDetectors/{device_id}/state",
-            headers=self._headers()
+            headers=self._headers(),
         )
         return resp.json()
+
 
 # Usage
 client = ResideoClient(refresh_token="your_refresh_token")

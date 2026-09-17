@@ -56,9 +56,7 @@ class ResideoConfigFlow(ConfigFlow, domain=DOMAIN):
         """Get the options flow for this handler."""
         return ResideoOptionsFlowHandler()
 
-    async def async_step_user(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Handle user-initiated flow - offer choice of auth methods."""
         return self.async_show_menu(
             step_id="user",
@@ -143,9 +141,7 @@ class ResideoConfigFlow(ConfigFlow, domain=DOMAIN):
             description_placeholders={"authorize_url": self._authorize_url},
         )
 
-    async def async_step_manual(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    async def async_step_manual(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Handle manual token entry."""
         errors: dict[str, str] = {}
 
@@ -199,9 +195,7 @@ class ResideoConfigFlow(ConfigFlow, domain=DOMAIN):
             },
         )
 
-    async def async_step_reauth(
-        self, entry_data: dict[str, Any]
-    ) -> ConfigFlowResult:
+    async def async_step_reauth(self, entry_data: dict[str, Any]) -> ConfigFlowResult:
         """Handle reauth."""
         return await self.async_step_reauth_confirm()
 
@@ -242,9 +236,7 @@ class ResideoConfigFlow(ConfigFlow, domain=DOMAIN):
                     client = ResideoApiClient(session, refresh_token)
                     accounts = await client.get_accounts()
 
-                    if mismatch := self._abort_if_reauth_account_mismatch(
-                        accounts.get("data", {})
-                    ):
+                    if mismatch := self._abort_if_reauth_account_mismatch(accounts.get("data", {})):
                         return mismatch
 
                     current_token = client.refresh_token
@@ -292,9 +284,7 @@ class ResideoConfigFlow(ConfigFlow, domain=DOMAIN):
             try:
                 accounts = await client.get_accounts()
 
-                if mismatch := self._abort_if_reauth_account_mismatch(
-                    accounts.get("data", {})
-                ):
+                if mismatch := self._abort_if_reauth_account_mismatch(accounts.get("data", {})):
                     return mismatch
 
                 current_token = client.refresh_token
@@ -324,9 +314,7 @@ class ResideoConfigFlow(ConfigFlow, domain=DOMAIN):
 class ResideoOptionsFlowHandler(OptionsFlow):
     """Handle options flow for Resideo."""
 
-    async def async_step_init(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Show menu of options."""
         return self.async_show_menu(
             step_id="init",
@@ -340,9 +328,7 @@ class ResideoOptionsFlowHandler(OptionsFlow):
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
 
-        current_interval = self.config_entry.options.get(
-            CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
-        )
+        current_interval = self.config_entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
 
         return self.async_show_form(
             step_id="settings",
@@ -396,13 +382,9 @@ class ResideoOptionsFlowHandler(OptionsFlow):
                         self.config_entry,
                         data=new_data,
                     )
-                    await self.hass.config_entries.async_reload(
-                        self.config_entry.entry_id
-                    )
+                    await self.hass.config_entries.async_reload(self.config_entry.entry_id)
 
-                    return self.async_create_entry(
-                        title="", data=self.config_entry.options
-                    )
+                    return self.async_create_entry(title="", data=self.config_entry.options)
 
             except ResideoAuthError:
                 errors["base"] = "invalid_token"

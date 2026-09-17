@@ -63,18 +63,14 @@ SENSOR_DESCRIPTIONS: tuple[ResideoSensorEntityDescription, ...] = (
         translation_key="battery_status",
         device_class=SensorDeviceClass.ENUM,
         options=["good", "low", "replace", "critical", "unknown"],
-        value_fn=lambda state: BATTERY_STATE_MAP.get(
-            state.battery_state, state.battery_state
-        ),
+        value_fn=lambda state: BATTERY_STATE_MAP.get(state.battery_state, state.battery_state),
     ),
     ResideoSensorEntityDescription(
         key="power_source",
         translation_key="power_source",
         device_class=SensorDeviceClass.ENUM,
         options=["ac", "battery", "dc", "unknown"],
-        value_fn=lambda state: POWER_STATE_MAP.get(
-            state.power_state, state.power_state
-        ),
+        value_fn=lambda state: POWER_STATE_MAP.get(state.power_state, state.power_state),
         icon_fn=lambda state: _POWER_SOURCE_ICONS.get(
             POWER_STATE_MAP.get(state.power_state, state.power_state)
         ),
@@ -286,9 +282,7 @@ async def async_setup_entry(
             for description in SENSOR_DESCRIPTIONS
         ]
 
-    async_add_entities_for_devices(
-        coordinator, entry, async_add_entities, _entities_for_device
-    )
+    async_add_entities_for_devices(coordinator, entry, async_add_entities, _entities_for_device)
 
 
 class ResideoSensor(ResideoEntity, SensorEntity):
