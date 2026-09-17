@@ -134,29 +134,24 @@ Copy `custom_components/resideo_firstalert/` into your HA `config/custom_compone
 
 > [!IMPORTANT]
 > **Email/password login no longer works.** Resideo has enabled a captcha on
-> its Auth0 login endpoint that blocks non-browser clients. Use manual token
-> entry instead.
+> its Auth0 login endpoint that blocks non-browser clients. Use **Sign in with
+> your browser** instead, where you sign in yourself and the captcha is
+> handled normally.
 
 1. Go to **Settings → Devices & Services → Add Integration → First Alert by Resideo**
-2. Enter your refresh token — see [Getting Your Token](#getting-your-token) below
-3. Your devices are discovered automatically
+2. Select **Sign in with your browser (Recommended)**
+3. Click the sign-in link shown in the dialog — it opens the Resideo login page in a new tab
+4. Sign in with your Resideo account (the same credentials you use in the First Alert app)
+5. After signing in, the browser lands on a page that just says **"Not found."** — this is expected. Copy the whole address from the address bar (it contains `?code=...`) and paste it back into Home Assistant, or just the `code` value if you prefer
+6. Your devices are discovered automatically
+
+The authorization code is single-use and expires quickly, so paste it promptly after signing in.
+
+If you'd rather not sign in through a browser (headless provisioning, scripting, etc.), choose **Enter refresh token manually** instead — see [Getting Your Token](#getting-your-token) below.
 
 ## Getting Your Token
 
-There are two ways to obtain a refresh token.
-
-### Option A — Browser login (no proxy needed)
-
-The captcha only blocks scripted logins; a real browser can complete it.
-
-1. Build an Auth0 authorize URL with PKCE (`code_challenge`, `code_challenge_method=S256`), `client_id` of `SRmiA7CaYi1JgivDZdzzoZu4X5VBogGt`, and `redirect_uri` of `com.resideo.firstalert://login.resideo.com/ios/com.resideo.firstalert/callback`
-2. Open it in a desktop browser, log in, and solve the captcha
-3. The browser will fail to follow the `com.resideo.firstalert://` redirect — that is the success case. Copy the whole failed URL and extract the `code` parameter
-4. Exchange the code at `POST https://login.resideo.com/oauth/token` with `grant_type=authorization_code` and your `code_verifier`
-
-Authorization codes expire within about 30 seconds, so do steps 3–4 promptly.
-
-### Option B — Capture from the app
+If you're using manual token entry, capture a refresh token from the app's own traffic:
 
 1. Install a network proxy such as [Proxyman](https://proxyman.io/) (macOS/iOS) or [mitmproxy](https://mitmproxy.org/)
 2. Configure SSL interception for `login.resideo.com`
@@ -172,6 +167,8 @@ Authorization codes expire within about 30 seconds, so do steps 3–4 promptly.
    ```
 5. In Home Assistant, paste the token
 
+If you want to script the browser-login flow instead of capturing app traffic (e.g. to obtain a token outside Home Assistant entirely), the underlying PKCE helpers are available directly from [`pyresideo-firstalert`](https://github.com/zackwag/pyresideo-firstalert#authentication).
+
 ## Options
 
 After setup, click **Configure** on the integration card to change:
@@ -183,7 +180,7 @@ After setup, click **Configure** on the integration card to change:
 
 ## Requirements
 
-- [`pyresideo-firstalert`](https://pypi.org/project/pyresideo-firstalert/) `== 1.0.0` (installed automatically) — async API client for the Resideo First Alert cloud API.
+- [`pyresideo-firstalert`](https://pypi.org/project/pyresideo-firstalert/) `== 1.1.0` (installed automatically) — async API client for the Resideo First Alert cloud API.
 - [`python-dateutil`](https://pypi.org/project/python-dateutil/) `>= 2.8.2` (installed automatically) — used to parse device timestamps.
 - Home Assistant 2024.1.0 or newer
 
@@ -300,8 +297,8 @@ On the device page in Home Assistant, click the three-dot menu → **Download di
 
 ### Common Errors
 
-- **"Invalid email or password"** — double-check your credentials; these are the same as your First Alert / Resideo app login.
-- **"Authentication failed"** — your refresh token may have expired. Use **Configure** to update it, or re-authenticate with email/password.
+- **"Resideo rejected this login"** — sign in again with **Sign in with your browser**; make sure you're using the same credentials as your First Alert / Resideo app login.
+- **"Authentication failed"** — your refresh token may have expired. Use **Configure** to update it, or re-authenticate via **Sign in with your browser**.
 - **"Unable to connect"** — check your internet connection and verify the Resideo API is accessible.
 - **Devices not showing** — make sure your devices are set up in the First Alert app and are online.
 
