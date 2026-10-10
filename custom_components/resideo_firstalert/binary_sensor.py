@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from homeassistant.components.binary_sensor import (
@@ -34,7 +34,7 @@ def _epoch_to_iso(epoch: int | None) -> str | None:
     """Convert a unix epoch timestamp to an ISO 8601 string."""
     if epoch is None:
         return None
-    return datetime.fromtimestamp(epoch, tz=timezone.utc).isoformat()
+    return datetime.fromtimestamp(epoch, tz=UTC).isoformat()
 
 
 @dataclass(frozen=True, kw_only=True)
