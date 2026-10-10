@@ -160,7 +160,7 @@ async def test_refresh_access_token_sets_access_token_and_expiry(session) -> Non
     assert client._access_token == "access-1"
     assert client._token_expiry is not None
 
-    assert client._token_expiry > datetime.now() + timedelta(minutes=59)  # noqa: DTZ005
+    assert client._token_expiry > datetime.now() + timedelta(minutes=59)
 
 
 async def test_refresh_access_token_rotates_and_calls_callback(session) -> None:
@@ -260,7 +260,7 @@ async def test_get_devices_refetches_after_cache_expires(session) -> None:
 
         # Force the cache to look expired (matches ResideoApiClient's own
         # naive datetime.now() convention).
-        client._devices_cache_time = datetime.now() - timedelta(hours=1)  # noqa: DTZ005
+        client._devices_cache_time = datetime.now() - timedelta(hours=1)
 
         m.get(
             ACCOUNTS_URL,
